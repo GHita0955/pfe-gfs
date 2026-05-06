@@ -25,59 +25,52 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-header">
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>üìÖ</div>
-          <h1>Connexion</h1>
-          <p>Acc√©dez √† votre espace de r√©servation</p>
+    <div className="min-h-screen bg-dark flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 text-2xl font-bold mb-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-gold inline-block" />
+            <span className="text-white">Reserv</span><span className="text-gold">Smart</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-1">Connexion</h1>
+          <p className="text-gray-500 text-sm">Accedez a votre espace de reservation</p>
         </div>
 
-        {error && <div className="alert alert-error">‚ö†Ô∏è {error}</div>}
+        <div className="card-dark animate-slide-up">
+          {error && (
+            <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2">
+              <span>&#9888;</span> {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Adresse email</label>
-            <input
-              type="email"
-              className="form-input"
-              placeholder="votre@email.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Mot de passe</label>
-            <input
-              type="password"
-              className="form-input"
-              placeholder="‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-          <button
-            type="submit"
-            className="btn btn-primary btn-full btn-lg"
-            disabled={loading}
-          >
-            {loading ? 'Connexion‚Ä¶' : 'Se connecter'}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Adresse email</label>
+              <input type="email" className="input-dark" placeholder="votre@email.com"
+                value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Mot de passe</label>
+              <input type="password" className="input-dark" placeholder="ïïïïïïïï"
+                value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password" />
+            </div>
+            <button type="submit" className="btn-gold w-full mt-2" disabled={loading}>
+              {loading ? 'ConnexionÖ' : 'Se connecter'}
+            </button>
+          </form>
 
-        <div className="auth-footer">
-          Pas encore de compte ?{' '}
-          <Link to="/register">Cr√©er un compte</Link>
+          <p className="text-center text-sm text-gray-500 mt-5">
+            Pas encore de compte ?{' '}
+            <Link to="/register" className="text-gold hover:text-gold-light font-medium transition-colors">Creer un compte</Link>
+          </p>
         </div>
 
-        <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--gray-50)', borderRadius: 'var(--radius)', fontSize: '0.8125rem', color: 'var(--gray-500)' }}>
-          <strong>Comptes de d√©mo :</strong><br />
-          Admin : admin@reserv.com / admin123<br />
-          Client : alice@mail.com / client123
+        {/* Demo credentials */}
+        <div className="mt-4 p-4 bg-dark-50 border border-dark-400 rounded-xl text-xs text-gray-500 space-y-1">
+          <p className="text-gray-400 font-semibold mb-1">Comptes de demo :</p>
+          <p>Admin : admin@reserv.com / admin123</p>
+          <p>Client : alice@mail.com / client123</p>
         </div>
       </div>
     </div>

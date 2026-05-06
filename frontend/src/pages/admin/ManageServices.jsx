@@ -1,59 +1,41 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { servicesAPI } from '../../services/api'
+import AdminLayout from '../../components/AdminLayout'
+import { useToast } from '../../context/ToastContext'
 
-const EMPTY_FORM = { name: '', description: '', base_price: '', duration: '' }
+const EMPTY = { name: '', description: '', base_price: '', duration: '' }
+const labelCls = "block text-sm font-medium text-gray-400 mb-1.5"
+const inputCls = "input-dark text-sm"
 
 export default function ManageServices() {
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editService, setEditService] = useState(null)
-  const [form, setForm] = useState(EMPTY_FORM)
+  const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const toast = useToast()
 
   useEffect(() => {
-    loadServices()
+    servicesAPI.getAllAdmin().then(res => setServices(res.data)).catch(console.error).finally(() => setLoading(false))
   }, [])
 
-  const loadServices = () => {
-    servicesAPI.getAllAdmin()
-      .then(res => setServices(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
-
-  const openCreate = () => {
-    setEditService(null)
-    setForm(EMPTY_FORM)
-    setError('')
-    setShowModal(true)
-  }
-
-  const openEdit = (service) => {
-    setEditService(service)
-    setForm({
-      name: service.name,
-      description: service.description || '',
-      base_price: service.base_price,
-      duration: service.duration
-    })
-    setError('')
-    setShowModal(true)
-  }
+  const openCreate = () => { setEditService(null); setForm(EMPTY); setError(''); setShowModal(true) }
+  const openEdit = (s) => { setEditService(s); setForm({ name: s.name, description: s.description || '', base_price: s.base_price, duration: s.duration }); setError(''); setShowModal(true) }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSaving(true)
-    setError('')
+    setSaving(true); setError('')
     try {
       if (editService) {
         const res = await servicesAPI.update(editService.id, form)
         setServices(prev => prev.map(s => s.id === editService.id ? res.data : s))
+        toast.success('Service mis à jour')
       } else {
         const res = await servicesAPI.create(form)
         setServices(prev => [...prev, res.data])
+        toast.success('Service créé')
       }
       setShowModal(false)
     } catch (err) {
@@ -63,177 +45,109 @@ export default function ManageServices() {
     }
   }
 
-  const handleToggle = async (service) => {
+  const handleToggle = async (s) => {
     try {
-      const res = await servicesAPI.update(service.id, { is_active: !service.is_active })
-      setServices(prev => prev.map(s => s.id === service.id ? res.data : s))
-    } catch (err) {
-      alert(err.response?.data?.error || 'Erreur')
-    }
+      const res = await servicesAPI.update(s.id, { is_active: !s.is_active })
+      setServices(prev => prev.map(x => x.id === s.id ? res.data : x))
+      toast.info(res.data.is_active ? 'Service activé' : 'Service désactivé')
+    } catch (err) { toast.error('Erreur', err.response?.data?.error || 'Impossible de modifier.') }
   }
 
   return (
-    <div className="page-container">
-      <nav className="admin-nav">
-        <Link to="/admin" className="admin-nav-link">📊 Dashboard</Link>
-        <Link to="/admin/reservations" className="admin-nav-link">📋 Réservations</Link>
-        <Link to="/admin/slots" className="admin-nav-link">🗓️ Créneaux</Link>
-        <Link to="/admin/services" className="admin-nav-link active">⚙️ Services</Link>
-      </nav>
-
-      <div className="section-header">
-        <div>
-          <h2>Gestion des Services</h2>
-          <p>{services.length} service{services.length !== 1 ? 's' : ''}</p>
+    <AdminLayout>
+      <div className="p-6 lg:p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Gestion des Services</h1>
+            <p className="text-gray-500 text-sm mt-1">{services.length} service{services.length !== 1 ? 's' : ''} configuré{services.length !== 1 ? 's' : ''}</p>
+          </div>
+          <button className="btn-gold text-sm" onClick={openCreate}>+ Nouveau service</button>
         </div>
-        <button className="btn btn-primary" onClick={openCreate}>
-          + Nouveau service
-        </button>
-      </div>
 
-      {loading ? (
-        <div className="loading-container"><div className="spinner" /></div>
-      ) : (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Prix de base</th>
-                <th>Durée</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {services.map(s => (
-                <tr key={s.id}>
-                  <td style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}>#{s.id}</td>
-                  <td><strong>{s.name}</strong></td>
-                  <td style={{ color: 'var(--gray-500)', maxWidth: '250px', fontSize: '0.8125rem' }}>
-                    {s.description || '—'}
-                  </td>
-                  <td><strong style={{ color: 'var(--primary)' }}>{s.base_price}€</strong></td>
-                  <td>{s.duration} min</td>
-                  <td>
-                    <span className={`badge ${s.is_active ? 'badge-success' : 'badge-danger'}`}>
-                      {s.is_active ? 'Actif' : 'Inactif'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => openEdit(s)}
-                      >
-                        ✏️ Modifier
-                      </button>
-                      <button
-                        className={`btn btn-sm ${s.is_active ? 'btn-danger' : 'btn-success'}`}
-                        onClick={() => handleToggle(s)}
-                      >
-                        {s.is_active ? 'Désactiver' : 'Activer'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {services.length === 0 && (
-            <div className="empty-state" style={{ padding: '3rem' }}>
-              <div className="empty-icon">⚙️</div>
-              <h3>Aucun service</h3>
-              <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={openCreate}>
-                Créer un service
-              </button>
+        {loading ? (
+          <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" /></div>
+        ) : (
+          <div className="bg-dark-100 border border-dark-400 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-dark-400">
+                    {['#', 'Nom', 'Description', 'Prix de base', 'Durée', 'Statut', 'Actions'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {services.map(s => (
+                    <tr key={s.id} className="border-b border-dark-400 hover:bg-dark-200 transition-colors">
+                      <td className="px-4 py-3 text-gray-600 text-xs">#{s.id}</td>
+                      <td className="px-4 py-3 text-white font-semibold">{s.name}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs max-w-[220px] truncate">{s.description || '—'}</td>
+                      <td className="px-4 py-3 text-gold font-bold">{s.base_price}€</td>
+                      <td className="px-4 py-3 text-gray-300">{s.duration} min</td>
+                      <td className="px-4 py-3"><span className={s.is_active ? 'badge-green' : 'badge-red'}>{s.is_active ? 'Actif' : 'Inactif'}</span></td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button className="text-xs text-gray-400 hover:text-white border border-dark-400 hover:border-gold/30 px-3 py-1.5 rounded-lg transition-colors" onClick={() => openEdit(s)}>✏️ Modifier</button>
+                          <button className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${s.is_active ? 'text-red-400 border-red-500/30 hover:bg-red-500/10' : 'text-green-400 border-green-500/30 hover:bg-green-500/10'}`} onClick={() => handleToggle(s)}>
+                            {s.is_active ? 'Désactiver' : 'Activer'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {services.length === 0 && (
+                <div className="text-center py-16">
+                  <p className="text-4xl mb-3">⚙️</p>
+                  <p className="text-white font-semibold mb-3">Aucun service</p>
+                  <button className="btn-gold text-sm" onClick={openCreate}>Créer un service</button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
-          <div className="modal">
-            <h2 className="modal-title">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative card-dark max-w-lg w-full animate-slide-up">
+            <h2 className="text-white font-bold text-xl mb-5">
               {editService ? '✏️ Modifier le service' : '➕ Nouveau service'}
             </h2>
 
-            {error && <div className="alert alert-error">{error}</div>}
+            {error && <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>}
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label">Nom du service *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Ex: Consultation Standard"
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  required
-                />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className={labelCls}>Nom du service *</label>
+                <input type="text" className={inputCls} placeholder="Ex: Consultation Standard" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
               </div>
-              <div className="form-group">
-                <label className="form-label">Description</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder="Description du service…"
-                  value={form.description}
-                  onChange={e => setForm({ ...form, description: e.target.value })}
-                  rows={3}
-                />
+              <div>
+                <label className={labelCls}>Description</label>
+                <textarea className={inputCls + " resize-none"} placeholder="Description du service…" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Prix de base (€) *</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    placeholder="50"
-                    min="0"
-                    step="0.01"
-                    value={form.base_price}
-                    onChange={e => setForm({ ...form, base_price: e.target.value })}
-                    required
-                  />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Prix de base (€) *</label>
+                  <input type="number" className={inputCls} placeholder="50" min="0" step="0.01" value={form.base_price} onChange={e => setForm({ ...form, base_price: e.target.value })} required />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Durée (minutes) *</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    placeholder="30"
-                    min="1"
-                    value={form.duration}
-                    onChange={e => setForm({ ...form, duration: e.target.value })}
-                    required
-                  />
+                <div>
+                  <label className={labelCls}>Durée (minutes) *</label>
+                  <input type="number" className={inputCls} placeholder="30" min="1" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} required />
                 </div>
               </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={saving}
-                >
-                  {saving ? 'Sauvegarde…' : editService ? 'Mettre à jour' : 'Créer'}
-                </button>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" className="btn-ghost text-sm" onClick={() => setShowModal(false)}>Annuler</button>
+                <button type="submit" className="btn-gold text-sm" disabled={saving}>{saving ? 'Sauvegarde…' : editService ? 'Mettre à jour' : 'Créer'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   )
 }
