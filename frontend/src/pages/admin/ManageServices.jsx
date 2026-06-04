@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { servicesAPI } from '../../services/api'
 import AdminLayout from '../../components/AdminLayout'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../components/ConfirmModal'
 
 const EMPTY = { name: '', description: '', base_price: '', duration: '' }
 const labelCls = "block text-sm font-medium text-gray-400 mb-1.5"
@@ -15,7 +16,9 @@ export default function ManageServices() {
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [deletingId, setDeletingId] = useState(null)
   const toast = useToast()
+  const confirm = useConfirm()
 
   useEffect(() => {
     servicesAPI.getAllAdmin().then(res => setServices(res.data)).catch(console.error).finally(() => setLoading(false))
@@ -53,9 +56,29 @@ export default function ManageServices() {
     } catch (err) { toast.error('Erreur', err.response?.data?.error || 'Impossible de modifier.') }
   }
 
+  const handleDelete = async (service) => {
+    const ok = await confirm({
+      title: 'Supprimer ce service ?',
+      message: 'Le service sera désactivé (suppression logique).',
+      danger: true
+    })
+    if (!ok) return
+
+    setDeletingId(service.id)
+    try {
+      await servicesAPI.delete(service.id)
+      setServices(prev => prev.map(s => s.id === service.id ? { ...s, is_active: false } : s))
+      toast.success('Service désactivé')
+    } catch (err) {
+      toast.error('Erreur', err.response?.data?.error || 'Impossible de supprimer.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <AdminLayout>
-      <div className="p-6 lg:p-8">
+      <div className="p-4 md:p-8 space-y-5 bg-[radial-gradient(circle_at_top_right,rgba(245,166,35,0.08),transparent_35%)]">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Gestion des Services</h1>
@@ -67,11 +90,11 @@ export default function ManageServices() {
         {loading ? (
           <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" /></div>
         ) : (
-          <div className="bg-dark-100 border border-dark-400 rounded-xl overflow-hidden">
+          <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-dark-400">
+                  <tr className="border-b border-[#25262a]">
                     {['#', 'Nom', 'Description', 'Prix de base', 'Durée', 'Statut', 'Actions'].map(h => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                     ))}
@@ -79,9 +102,9 @@ export default function ManageServices() {
                 </thead>
                 <tbody>
                   {services.map(s => (
-                    <tr key={s.id} className="border-b border-dark-400 hover:bg-dark-200 transition-colors">
+                    <tr key={s.id} className="border-b border-[#222328] hover:bg-[#15161a] transition-colors">
                       <td className="px-4 py-3 text-gray-600 text-xs">#{s.id}</td>
-                      <td className="px-4 py-3 text-white font-semibold">{s.name}</td>
+                      <td className="px-4 py-3 text-white font-semibold flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold" />{s.name}</td>
                       <td className="px-4 py-3 text-gray-500 text-xs max-w-[220px] truncate">{s.description || '—'}</td>
                       <td className="px-4 py-3 text-gold font-bold">{s.base_price}€</td>
                       <td className="px-4 py-3 text-gray-300">{s.duration} min</td>
@@ -91,6 +114,13 @@ export default function ManageServices() {
                           <button className="text-xs text-gray-400 hover:text-white border border-dark-400 hover:border-gold/30 px-3 py-1.5 rounded-lg transition-colors" onClick={() => openEdit(s)}>✏️ Modifier</button>
                           <button className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${s.is_active ? 'text-red-400 border-red-500/30 hover:bg-red-500/10' : 'text-green-400 border-green-500/30 hover:bg-green-500/10'}`} onClick={() => handleToggle(s)}>
                             {s.is_active ? 'Désactiver' : 'Activer'}
+                          </button>
+                          <button
+                            className="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+                            onClick={() => handleDelete(s)}
+                            disabled={deletingId === s.id}
+                          >
+                            {deletingId === s.id ? '…' : 'Supprimer'}
                           </button>
                         </div>
                       </td>
@@ -114,7 +144,7 @@ export default function ManageServices() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative card-dark max-w-lg w-full animate-slide-up">
+          <div className="relative max-w-lg w-full animate-slide-up rounded-2xl border border-[#242429] bg-gradient-to-b from-[#141417] to-[#0f1012] p-6">
             <h2 className="text-white font-bold text-xl mb-5">
               {editService ? '✏️ Modifier le service' : '➕ Nouveau service'}
             </h2>
@@ -124,20 +154,20 @@ export default function ManageServices() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className={labelCls}>Nom du service *</label>
-                <input type="text" className={inputCls} placeholder="Ex: Consultation Standard" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+                <input type="text" className={inputCls + ' !bg-[#121215] !border-[#26262a]'} placeholder="Ex: Consultation Standard" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div>
                 <label className={labelCls}>Description</label>
-                <textarea className={inputCls + " resize-none"} placeholder="Description du service…" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} />
+                <textarea className={inputCls + " resize-none !bg-[#121215] !border-[#26262a]"} placeholder="Description du service…" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelCls}>Prix de base (€) *</label>
-                  <input type="number" className={inputCls} placeholder="50" min="0" step="0.01" value={form.base_price} onChange={e => setForm({ ...form, base_price: e.target.value })} required />
+                  <input type="number" className={inputCls + ' !bg-[#121215] !border-[#26262a]'} placeholder="50" min="0" step="0.01" value={form.base_price} onChange={e => setForm({ ...form, base_price: e.target.value })} required />
                 </div>
                 <div>
                   <label className={labelCls}>Durée (minutes) *</label>
-                  <input type="number" className={inputCls} placeholder="30" min="1" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} required />
+                  <input type="number" className={inputCls + ' !bg-[#121215] !border-[#26262a]'} placeholder="30" min="1" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} required />
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">

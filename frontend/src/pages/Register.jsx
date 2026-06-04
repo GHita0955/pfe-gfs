@@ -20,7 +20,11 @@ export default function Register() {
       await register(form.username, form.email, form.password)
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.error || "Erreur lors de l'inscription")
+      if (!err.response) {
+        setError('Serveur backend inaccessible (port 5000). Démarrez le backend puis réessayez.')
+      } else {
+        setError(err.response?.data?.error || "Erreur lors de l'inscription")
+      }
     } finally {
       setLoading(false)
     }

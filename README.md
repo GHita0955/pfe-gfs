@@ -39,6 +39,11 @@ venv\Scripts\activate          # Windows
 # Installer les dépendances
 pip install -r requirements.txt
 
+# Configurer MySQL (option recommandée du cahier des charges)
+# 1) Créer la base : reservsmart
+# 2) Copier backend/.env.example vers backend/.env
+# 3) Adapter MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB
+
 # Initialiser la base de données avec les données de démo
 python init_db.py
 
@@ -115,7 +120,7 @@ La logique de tarification (`utils/pricing.py`) ajuste le prix selon :
 | Couche      | Technologie                          |
 |-------------|--------------------------------------|
 | Backend     | Python 3.10+, Flask 3, SQLAlchemy    |
-| Base de données | SQLite (développement)           |
+| Base de données | MySQL (principal), SQLite (fallback local) |
 | Auth        | JWT (Flask-JWT-Extended)             |
 | Frontend    | React 18, React Router v6            |
 | Graphiques  | Recharts                             |

@@ -11,10 +11,11 @@ const PIE_COLORS = ['#22c55e', '#ef4444', '#F5A623']
 
 function StatCard({ icon, value, label, accent }) {
   return (
-    <div className={`bg-dark-50 border rounded-xl p-5 transition-all hover:border-gold/20 ${accent ? 'border-gold/30' : 'border-dark-400'}`}>
-      <p className="text-2xl mb-2">{icon}</p>
-      <p className={`text-2xl font-bold ${accent ? 'text-gold' : 'text-white'}`}>{value}</p>
-      <p className="text-gray-500 text-xs mt-1">{label}</p>
+    <div className={`relative overflow-hidden bg-gradient-to-b from-[#141417] to-[#0f1012] border rounded-2xl px-4 py-4 transition-all hover:-translate-y-0.5 ${accent ? 'border-gold/30 shadow-gold' : 'border-[#242429] hover:border-[#323238]'}`}>
+      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-gold/5" />
+      <p className="text-xl mb-2 relative z-10">{icon}</p>
+      <p className={`text-2xl font-bold relative z-10 ${accent ? 'text-gold' : 'text-white'}`}>{value}</p>
+      <p className="text-gray-500 text-xs mt-1 relative z-10">{label}</p>
     </div>
   )
 }
@@ -70,129 +71,185 @@ export default function Dashboard() {
 
   return (
     <AdminLayout>
-      <div className="p-6 lg:p-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-white">Tableau de bord</h1>
-          <p className="text-gray-500 text-sm mt-1">Vue d'ensemble de l'activité en temps réel</p>
+      <div className="p-4 md:p-8 space-y-5 bg-[radial-gradient(circle_at_top_right,rgba(245,166,35,0.08),transparent_35%)]">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+          <StatCard icon="💶" value={`${stats?.total_revenue || 0}€`} label="Today's Income" accent />
+          <StatCard icon="📋" value={stats?.confirmed_reservations || 0} label="Today's Orders" />
+          <StatCard icon="👥" value={stats?.total_clients || 0} label="Today's Customers" />
+          <StatCard icon="❌" value={stats?.cancelled_reservations || 0} label="Canceled Order" />
         </div>
 
-        {/* Stats */}
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon="📋" value={stats.confirmed_reservations} label="Réservations confirmées" accent />
-            <StatCard icon="💶" value={`${stats.total_revenue}€`} label="Revenu total" accent />
-            <StatCard icon="👥" value={stats.total_clients} label="Clients" />
-            <StatCard icon="📈" value={`${stats.occupancy_rate}%`} label="Taux d'occupation" />
-            <StatCard icon="🗓️" value={stats.available_slots} label="Créneaux disponibles" />
-            <StatCard icon="📅" value={stats.week_reservations} label="Cette semaine" />
-            <StatCard icon="❌" value={stats.cancelled_reservations} label="Annulations" />
-            <StatCard icon="🗂️" value={stats.total_slots} label="Créneaux totaux" />
-          </div>
-        )}
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {[
-            { title: '📈 Revenus par mois', dataKey: 'revenue', color: '#F5A623', data: revenueData, fmt: (v) => [`${v}€`, 'Revenus'] },
-            { title: '🔢 Réservations par mois', dataKey: 'count', color: '#60a5fa', data: revenueData, fmt: (v) => [v, 'Réservations'] },
-          ].map(chart => (
-            <div key={chart.title} className="bg-dark-50 border border-dark-400 rounded-xl p-5">
-              <p className="text-white font-semibold text-sm mb-4">{chart.title}</p>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={chart.data} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-                  <CartesianGrid {...chartStyle.grid} />
-                  <XAxis dataKey="month_name" tick={chartStyle.tick} />
-                  <YAxis tick={chartStyle.tick} />
-                  <Tooltip {...chartStyle.tooltip} formatter={chart.fmt} />
-                  <Bar dataKey={chart.dataKey} fill={chart.color} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 lg:col-span-8 bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white font-semibold text-sm">Total Revenue</p>
+              <p className="text-xs text-gray-500">Last 12 months</p>
             </div>
-          ))}
-
-          <div className="bg-dark-50 border border-dark-400 rounded-xl p-5">
-            <p className="text-white font-semibold text-sm mb-4">📊 Taux d'occupation par jour</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={occupancyData} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-                <CartesianGrid {...chartStyle.grid} />
-                <XAxis dataKey="day" tick={chartStyle.tick} />
-                <YAxis tick={chartStyle.tick} domain={[0, 100]} unit="%" />
-                <Tooltip {...chartStyle.tooltip} formatter={(v) => [`${v}%`, 'Occupation']} />
-                <Bar dataKey="occupancy" fill="#22c55e" radius={[4, 4, 0, 0]} />
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={revenueData} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
+                <CartesianGrid {...chartStyle.grid} vertical={false} />
+                <XAxis dataKey="month_name" tick={chartStyle.tick} axisLine={false} tickLine={false} />
+                <YAxis tick={chartStyle.tick} axisLine={false} tickLine={false} />
+                <Tooltip {...chartStyle.tooltip} formatter={(v) => [`${v}€`, 'Revenue']} />
+                <Bar dataKey="revenue" fill="url(#goldGrad)" radius={[8, 8, 0, 0]} maxBarSize={34} />
+                <defs>
+                  <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F5A623" />
+                    <stop offset="100%" stopColor="#8a5b12" />
+                  </linearGradient>
+                </defs>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-dark-50 border border-dark-400 rounded-xl p-5">
-            <p className="text-white font-semibold text-sm mb-4">🥧 Répartition par statut</p>
+          <div className="col-span-12 md:col-span-6 lg:col-span-4 bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+            <p className="text-white font-semibold text-sm mb-3">Weekly Best Seller Item</p>
+            <div className="rounded-2xl bg-[#101114] border border-[#25262a] p-4 flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#f6b24f] to-[#c98216] border-4 border-[#2a221b] mb-3" />
+              <p className="text-white text-sm font-semibold">Chicken Burger</p>
+              <p className="text-xs text-gray-500 mt-1">Top performing menu</p>
+              <p className="text-gold font-bold mt-2">{recent?.[0]?.price ? `${recent[0].price}€` : '10.99€'}</p>
+            </div>
+          </div>
+
+          <div className="col-span-12 lg:col-span-8 bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl overflow-hidden">
+            <div className="px-4 md:px-5 py-4 border-b border-[#25262a] flex items-center justify-between">
+              <p className="text-white font-semibold text-sm">Recent Orders</p>
+              <Link to="/admin/reservations" className="text-gold text-xs hover:text-gold-light transition-colors">View all</Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#25262a]">
+                    {['Item', 'Placed On', 'Customer', 'Payment', 'Status', 'Amount'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {recent.map(r => (
+                    <tr key={r.id} className="border-b border-[#222328] hover:bg-[#15161a] transition-colors">
+                      <td className="px-4 py-3 text-white whitespace-nowrap">{r.slot?.service_name || 'Service'}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{r.slot?.date || '-'}</td>
+                      <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{r.client_name}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">Paid</td>
+                      <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
+                      <td className="px-4 py-3 text-gold font-semibold whitespace-nowrap">{r.price}€</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {recent.length === 0 && (
+                <div className="text-center py-10 text-gray-500 text-sm">Aucune réservation pour le moment</div>
+              )}
+            </div>
+          </div>
+
+          <div className="col-span-12 md:col-span-6 lg:col-span-4 grid gap-4">
+            <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+              <p className="text-white font-semibold text-sm mb-3">Daily Trending Menus</p>
+              <div className="space-y-2.5">
+                {(recent.slice(0, 4).map((r, idx) => ({
+                  name: r.slot?.service_name || `Menu ${idx + 1}`,
+                  price: r.price || (10 + idx * 2),
+                }))).map((item, i) => (
+                  <div key={`${item.name}-${i}`} className="flex items-center justify-between rounded-xl border border-[#25262a] bg-[#101114] px-3 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-gold" />
+                      <span className="text-gray-200 text-sm">{item.name}</span>
+                    </div>
+                    <span className="text-gold text-sm font-semibold">{item.price}€</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+              <p className="text-white font-semibold text-sm mb-3">Customer Map</p>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={occupancyData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid {...chartStyle.grid} vertical={false} />
+                  <XAxis dataKey="day" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis hide />
+                  <Tooltip {...chartStyle.tooltip} formatter={(v) => [`${v}%`, 'Traffic']} />
+                  <Bar dataKey="occupancy" fill="#b5651d" radius={[6, 6, 0, 0]} maxBarSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-4">
+          <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white font-semibold text-sm">Reservations by Status</p>
+              <p className="text-xs text-gray-500">Live overview</p>
+            </div>
             {statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
+                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={65} outerRadius={95} paddingAngle={4} dataKey="value">
                     {statusData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                   </Pie>
                   <Tooltip contentStyle={chartStyle.tooltip.contentStyle} />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', color: '#888' }} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', color: '#9ca3af' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : <p className="text-gray-600 text-sm text-center py-8">Aucune donnée</p>}
           </div>
+
+          <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+            <p className="text-white font-semibold text-sm mb-3">Forecast Pulse</p>
+            <div className="grid grid-cols-7 gap-2">
+              {forecast.slice(0, 14).map(d => {
+                const colorMap = {
+                  high: 'border-red-500/40 bg-red-500/10 text-red-400',
+                  medium: 'border-gold/40 bg-gold/10 text-gold',
+                  low: 'border-green-500/40 bg-green-500/10 text-green-400'
+                }
+                return (
+                  <div key={d.date} className={`border rounded-lg p-2 text-center text-[10px] transition-all ${colorMap[d.level] || 'border-[#2a2a2f] text-gray-500'}`}>
+                    <p className="font-semibold">{d.day_name.slice(0, 3)}</p>
+                    <p className="opacity-70">{d.date.slice(8)}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Forecast */}
-        <div className="bg-dark-50 border border-dark-400 rounded-xl p-5">
-          <p className="text-white font-semibold text-sm mb-4">🔮 Prévision de la demande (14 prochains jours)</p>
-          <div className="flex gap-3 mb-4 flex-wrap">
-            {[['bg-red-500/20 text-red-400', '🔴 Forte demande'], ['bg-gold/20 text-gold', '🟡 Demande moyenne'], ['bg-green-500/20 text-green-400', '🟢 Faible demande']].map(([cls, label]) => (
-              <span key={label} className={`text-xs px-3 py-1 rounded-full font-medium ${cls}`}>{label}</span>
-            ))}
+        {/* Cahier des charges: occupancy by day + reservations by month */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white font-semibold text-sm">Taux d'occupation par jour</p>
+              <p className="text-xs text-gray-500">Cahier des charges</p>
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={occupancyData} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
+                <CartesianGrid {...chartStyle.grid} vertical={false} />
+                <XAxis dataKey="day" tick={chartStyle.tick} axisLine={false} tickLine={false} />
+                <YAxis tick={chartStyle.tick} domain={[0, 100]} unit="%" axisLine={false} tickLine={false} />
+                <Tooltip {...chartStyle.tooltip} formatter={(v) => [`${v}%`, 'Occupation']} />
+                <Bar dataKey="occupancy" fill="#22c55e" radius={[6, 6, 0, 0]} maxBarSize={26} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <div className="grid grid-cols-7 gap-2">
-            {forecast.map(d => {
-              const colorMap = { high: 'border-red-500/40 bg-red-500/10 text-red-400', medium: 'border-gold/40 bg-gold/10 text-gold', low: 'border-green-500/40 bg-green-500/10 text-green-400' }
-              return (
-                <div key={d.date} className={`border rounded-xl p-2.5 text-center text-xs transition-all ${colorMap[d.level] || 'border-dark-400 text-gray-500'}`}>
-                  <p className="font-semibold">{d.day_name}</p>
-                  <p className="text-xs opacity-70">{d.date.slice(8)}/{d.date.slice(5,7)}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
 
-        {/* Recent reservations */}
-        <div className="bg-dark-100 border border-dark-400 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-dark-400">
-            <p className="text-white font-semibold">🕐 Réservations récentes</p>
-            <Link to="/admin/reservations" className="text-gold text-xs hover:text-gold-light transition-colors">Voir tout →</Link>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-dark-400">
-                  {['#', 'Client', 'Service', 'Date', 'Horaire', 'Prix', 'Statut'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map(r => (
-                  <tr key={r.id} className="border-b border-dark-400 hover:bg-dark-200 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 text-xs">#{r.id}</td>
-                    <td className="px-4 py-3 text-white">{r.client_name}</td>
-                    <td className="px-4 py-3 text-gray-400">{r.slot?.service_name}</td>
-                    <td className="px-4 py-3 text-gray-400">{r.slot?.date}</td>
-                    <td className="px-4 py-3 text-gray-400 whitespace-nowrap">{r.slot?.start_time} – {r.slot?.end_time}</td>
-                    <td className="px-4 py-3 text-gold font-semibold">{r.price}€</td>
-                    <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {recent.length === 0 && (
-              <div className="text-center py-10 text-gray-500 text-sm">Aucune réservation pour le moment</div>
-            )}
+          <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white font-semibold text-sm">Nombre de réservations par mois</p>
+              <p className="text-xs text-gray-500">Cahier des charges</p>
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={revenueData} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
+                <CartesianGrid {...chartStyle.grid} vertical={false} />
+                <XAxis dataKey="month_name" tick={chartStyle.tick} axisLine={false} tickLine={false} />
+                <YAxis tick={chartStyle.tick} allowDecimals={false} axisLine={false} tickLine={false} />
+                <Tooltip {...chartStyle.tooltip} formatter={(v) => [v, 'Réservations']} />
+                <Bar dataKey="count" fill="#60a5fa" radius={[6, 6, 0, 0]} maxBarSize={26} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

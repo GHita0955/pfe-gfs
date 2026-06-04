@@ -18,7 +18,11 @@ export default function Login() {
       const user = await login(email, password)
       navigate(user.role === 'admin' ? '/admin' : '/')
     } catch (err) {
-      setError(err.response?.data?.error || 'Erreur de connexion')
+      if (!err.response) {
+        setError('Serveur backend inaccessible (port 5000). D√©marrez le backend puis r√©essayez.')
+      } else {
+        setError(err.response?.data?.error || 'Erreur de connexion')
+      }
     } finally {
       setLoading(false)
     }
@@ -34,7 +38,7 @@ export default function Login() {
             <span className="text-white">Reserv</span><span className="text-gold">Smart</span>
           </div>
           <h1 className="text-3xl font-bold text-white mb-1">Connexion</h1>
-          <p className="text-gray-500 text-sm">Accedez a votre espace de reservation</p>
+          <p className="text-gray-500 text-sm">Acc√©dez √† votre espace de r√©servation</p>
         </div>
 
         <div className="card-dark animate-slide-up">
@@ -52,23 +56,23 @@ export default function Login() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1.5">Mot de passe</label>
-              <input type="password" className="input-dark" placeholder="ïïïïïïïï"
+              <input type="password" className="input-dark" placeholder="‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢"
                 value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password" />
             </div>
             <button type="submit" className="btn-gold w-full mt-2" disabled={loading}>
-              {loading ? 'ConnexionÖ' : 'Se connecter'}
+              {loading ? 'Connexion‚Ä¶' : 'Se connecter'}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-5">
             Pas encore de compte ?{' '}
-            <Link to="/register" className="text-gold hover:text-gold-light font-medium transition-colors">Creer un compte</Link>
+            <Link to="/register" className="text-gold hover:text-gold-light font-medium transition-colors">Cr√©er un compte</Link>
           </p>
         </div>
 
         {/* Demo credentials */}
         <div className="mt-4 p-4 bg-dark-50 border border-dark-400 rounded-xl text-xs text-gray-500 space-y-1">
-          <p className="text-gray-400 font-semibold mb-1">Comptes de demo :</p>
+          <p className="text-gray-400 font-semibold mb-1">Comptes de d√©mo :</p>
           <p>Admin : admin@reserv.com / admin123</p>
           <p>Client : alice@mail.com / client123</p>
         </div>

@@ -45,26 +45,50 @@ export default function ManageReservations() {
     return matchStatus && matchSearch
   })
 
+  const confirmedCount = reservations.filter(r => r.status === 'confirmed').length
+  const cancelledCount = reservations.filter(r => r.status === 'cancelled').length
+  const pendingCount = reservations.filter(r => r.status === 'pending').length
+
   return (
     <AdminLayout>
-      <div className="p-6 lg:p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">Gestion des Réservations</h1>
-          <p className="text-gray-500 text-sm mt-1">{filtered.length} résultat{filtered.length !== 1 ? 's' : ''}</p>
+      <div className="p-4 md:p-8 space-y-5 bg-[radial-gradient(circle_at_top_right,rgba(245,166,35,0.08),transparent_35%)]">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="rounded-2xl border border-gold/25 bg-gradient-to-b from-[#171513] to-[#11100f] p-4">
+            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-2xl font-bold text-gold mt-1">{reservations.length}</p>
+          </div>
+          <div className="rounded-2xl border border-[#25262a] bg-gradient-to-b from-[#141417] to-[#0f1012] p-4">
+            <p className="text-xs text-gray-500">Confirmées</p>
+            <p className="text-2xl font-bold text-green-400 mt-1">{confirmedCount}</p>
+          </div>
+          <div className="rounded-2xl border border-[#25262a] bg-gradient-to-b from-[#141417] to-[#0f1012] p-4">
+            <p className="text-xs text-gray-500">En attente</p>
+            <p className="text-2xl font-bold text-gold mt-1">{pendingCount}</p>
+          </div>
+          <div className="rounded-2xl border border-[#25262a] bg-gradient-to-b from-[#141417] to-[#0f1012] p-4">
+            <p className="text-xs text-gray-500">Annulées</p>
+            <p className="text-2xl font-bold text-red-400 mt-1">{cancelledCount}</p>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Gestion des Réservations</h1>
+            <p className="text-gray-500 text-sm mt-1">{filtered.length} résultat{filtered.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
           <input
             type="text"
-            className="input-dark max-w-xs text-sm"
+            className="input-dark max-w-xs text-sm !bg-[#121215] !border-[#26262a]"
             placeholder="🔍 Rechercher client, service…"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
           {[['all', 'Toutes'], ['confirmed', 'Confirmées'], ['cancelled', 'Annulées'], ['pending', 'En attente']].map(([k, l]) => (
             <button key={k} onClick={() => setStatusFilter(k)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === k ? 'bg-gold/15 text-gold border border-gold/30' : 'text-gray-400 border border-dark-400 hover:text-white'}`}>
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${statusFilter === k ? 'bg-gradient-to-r from-gold/20 to-gold/5 text-gold border border-gold/30' : 'text-gray-400 border border-[#26262a] bg-[#121215] hover:text-white hover:border-[#34343a]'}`}>
               {l}
             </button>
           ))}
@@ -73,11 +97,11 @@ export default function ManageReservations() {
         {loading ? (
           <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" /></div>
         ) : (
-          <div className="bg-dark-100 border border-dark-400 rounded-xl overflow-hidden">
+          <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-dark-400">
+                  <tr className="border-b border-[#25262a]">
                     {['#ID', 'Client', 'Service', 'Date', 'Horaire', 'Prix', 'Statut', 'Créée le', 'Actions'].map(h => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
@@ -85,10 +109,10 @@ export default function ManageReservations() {
                 </thead>
                 <tbody>
                   {filtered.map(r => (
-                    <tr key={r.id} className="border-b border-dark-400 hover:bg-dark-200 transition-colors">
+                    <tr key={r.id} className="border-b border-[#222328] hover:bg-[#15161a] transition-colors">
                       <td className="px-4 py-3 text-gray-600 text-xs">#{r.id}</td>
                       <td className="px-4 py-3">
-                        <p className="text-white font-medium">{r.client_name}</p>
+                        <p className="text-white font-medium flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold" />{r.client_name}</p>
                         <p className="text-gray-500 text-xs">{r.client_email}</p>
                       </td>
                       <td className="px-4 py-3 text-gray-300">{r.slot?.service_name}</td>

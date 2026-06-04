@@ -39,11 +39,11 @@ export default function Navbar() {
             <li><NavLink to="/login" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Connexion</NavLink></li>
             <li><NavLink to="/register" className="btn-gold text-sm ml-2">S'inscrire</NavLink></li>
           </>)}
-          {user && user.role === 'client' && (<li><NavLink to="/reservations" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Mes r�servations</NavLink></li>)}
+          {user && user.role === 'client' && (<li><NavLink to="/reservations" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Mes réservations</NavLink></li>)}
           {user && user.role === 'admin' && (<li><NavLink to="/admin/dashboard" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Administration</NavLink></li>)}
           {user && (
             <li>
-              <button onClick={handleLogout} title="Deconnexion" className="flex items-center gap-2 ml-2 px-3 py-1.5 rounded-lg border border-dark-400 hover:border-gold/50 transition-all group">
+              <button onClick={handleLogout} title="Déconnexion" className="flex items-center gap-2 ml-2 px-3 py-1.5 rounded-lg border border-dark-400 hover:border-gold/50 transition-all group">
                 <span className="w-7 h-7 rounded-full bg-gold text-black text-xs font-bold flex items-center justify-center">{initials}</span>
                 <span className="text-sm text-gray-400 group-hover:text-white max-w-[100px] truncate">{user.username || user.email}</span>
               </button>
@@ -59,9 +59,9 @@ export default function Navbar() {
             <NavLink to="/login" onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Connexion</NavLink>
             <NavLink to="/register" onClick={() => setOpen(false)} className="block btn-gold text-sm text-center mt-2">S'inscrire</NavLink>
           </>)}
-          {user && user.role === 'client' && (<NavLink to="/reservations" onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Mes reservations</NavLink>)}
+          {user && user.role === 'client' && (<NavLink to="/reservations" onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Mes réservations</NavLink>)}
           {user && user.role === 'admin' && (<NavLink to="/admin/dashboard" onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Administration</NavLink>)}
-          {user && (<button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"><span className="w-6 h-6 rounded-full bg-gold text-black text-xs font-bold flex items-center justify-center">{initials}</span>Deconnexion</button>)}
+          {user && (<button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"><span className="w-6 h-6 rounded-full bg-gold text-black text-xs font-bold flex items-center justify-center">{initials}</span>Déconnexion</button>)}
         </div>
       )}
     </nav>

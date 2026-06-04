@@ -77,17 +77,17 @@ export default function ManageSlots() {
 
   return (
     <AdminLayout>
-      <div className="p-6 lg:p-8">
+      <div className="p-4 md:p-8 space-y-5 bg-[radial-gradient(circle_at_top_right,rgba(245,166,35,0.08),transparent_35%)]">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Gestion des Créneaux</h1>
           <p className="text-gray-500 text-sm mt-1">Générez et gérez les créneaux horaires de vos services</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-2">
           {[['generate', '⚡ Générer'], ['list', '📋 Liste']].map(([k, l]) => (
             <button key={k} onClick={() => setTab(k)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === k ? 'bg-gold/15 text-gold border border-gold/30' : 'text-gray-400 border border-dark-400 hover:text-white'}`}>
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === k ? 'bg-gradient-to-r from-gold/20 to-gold/5 text-gold border border-gold/30' : 'text-gray-400 border border-[#26262a] bg-[#121215] hover:text-white hover:border-[#34343a]'}`}>
               {l}
             </button>
           ))}
@@ -96,12 +96,12 @@ export default function ManageSlots() {
         {/* Generate tab */}
         {tab === 'generate' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="card-dark">
+            <div className="rounded-2xl border border-[#242429] bg-gradient-to-b from-[#141417] to-[#0f1012] p-5">
               <h3 className="text-white font-semibold mb-4">Générateur de créneaux en masse</h3>
               <form onSubmit={handleGenerate} className="space-y-4">
                 <div>
                   <label className={labelCls}>Service</label>
-                  <select className={inputCls} value={genForm.service_id} onChange={e => setGenForm({ ...genForm, service_id: e.target.value })} required>
+                  <select className={inputCls + ' !bg-[#121215] !border-[#26262a]'} value={genForm.service_id} onChange={e => setGenForm({ ...genForm, service_id: e.target.value })} required>
                     <option value="">-- Sélectionner --</option>
                     {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
@@ -109,11 +109,11 @@ export default function ManageSlots() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Date de début</label>
-                    <input type="date" className={inputCls} value={genForm.start_date} onChange={e => setGenForm({ ...genForm, start_date: e.target.value })} required />
+                    <input type="date" className={inputCls + ' !bg-[#121215] !border-[#26262a]'} value={genForm.start_date} onChange={e => setGenForm({ ...genForm, start_date: e.target.value })} required />
                   </div>
                   <div>
                     <label className={labelCls}>Date de fin</label>
-                    <input type="date" className={inputCls} value={genForm.end_date} onChange={e => setGenForm({ ...genForm, end_date: e.target.value })} required />
+                    <input type="date" className={inputCls + ' !bg-[#121215] !border-[#26262a]'} value={genForm.end_date} onChange={e => setGenForm({ ...genForm, end_date: e.target.value })} required />
                   </div>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-400">
@@ -128,9 +128,9 @@ export default function ManageSlots() {
                   <div className="space-y-2">
                     {timePairs.map((tp, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <input type="time" className={inputCls + " flex-1"} value={tp.start} onChange={e => setTimePairs(timePairs.map((x, j) => j === i ? { ...x, start: e.target.value } : x))} required />
+                        <input type="time" className={inputCls + " flex-1 !bg-[#121215] !border-[#26262a]"} value={tp.start} onChange={e => setTimePairs(timePairs.map((x, j) => j === i ? { ...x, start: e.target.value } : x))} required />
                         <span className="text-gray-600 text-sm">→</span>
-                        <input type="time" className={inputCls + " flex-1"} value={tp.end} onChange={e => setTimePairs(timePairs.map((x, j) => j === i ? { ...x, end: e.target.value } : x))} required />
+                        <input type="time" className={inputCls + " flex-1 !bg-[#121215] !border-[#26262a]"} value={tp.end} onChange={e => setTimePairs(timePairs.map((x, j) => j === i ? { ...x, end: e.target.value } : x))} required />
                         {timePairs.length > 1 && <button type="button" className="text-gray-600 hover:text-red-400 w-6 h-6 flex items-center justify-center" onClick={() => setTimePairs(timePairs.filter((_, j) => j !== i))}>✕</button>}
                       </div>
                     ))}
@@ -142,7 +142,7 @@ export default function ManageSlots() {
               </form>
             </div>
 
-            <div className="p-5 bg-gold/5 border border-gold/20 rounded-xl text-sm text-gray-400 space-y-2">
+            <div className="p-5 bg-gradient-to-b from-[#1b1510] to-[#120f0d] border border-[#2a221b] rounded-2xl text-sm text-gray-400 space-y-2">
               <p className="text-gold font-semibold mb-2">💡 Comment ça marche</p>
               <ul className="space-y-1.5 list-disc list-inside">
                 <li>Sélectionnez un service et une plage de dates</li>
@@ -158,22 +158,22 @@ export default function ManageSlots() {
         {tab === 'list' && (
           <>
             <div className="flex flex-wrap gap-3 mb-5">
-              <select className="input-dark text-sm max-w-[200px]" value={listFilter.service_id} onChange={e => setListFilter({ ...listFilter, service_id: e.target.value })}>
+              <select className="input-dark text-sm max-w-[200px] !bg-[#121215] !border-[#26262a]" value={listFilter.service_id} onChange={e => setListFilter({ ...listFilter, service_id: e.target.value })}>
                 <option value="">Tous les services</option>
                 {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
-              <input type="date" className="input-dark text-sm max-w-[180px]" value={listFilter.date} onChange={e => setListFilter({ ...listFilter, date: e.target.value })} />
+              <input type="date" className="input-dark text-sm max-w-[180px] !bg-[#121215] !border-[#26262a]" value={listFilter.date} onChange={e => setListFilter({ ...listFilter, date: e.target.value })} />
               <button className="btn-gold text-sm" onClick={loadSlots}>🔍 Filtrer</button>
             </div>
 
             {listLoading ? (
               <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" /></div>
             ) : (
-              <div className="bg-dark-100 border border-dark-400 rounded-xl overflow-hidden">
+              <div className="bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-dark-400">
+                      <tr className="border-b border-[#25262a]">
                         {['#', 'Service', 'Date', 'Horaire', 'Prix dynamique', 'Disponibilité', 'Actions'].map(h => (
                           <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                         ))}
@@ -181,7 +181,7 @@ export default function ManageSlots() {
                     </thead>
                     <tbody>
                       {slots.map(slot => (
-                        <tr key={slot.id} className="border-b border-dark-400 hover:bg-dark-200 transition-colors">
+                        <tr key={slot.id} className="border-b border-[#222328] hover:bg-[#15161a] transition-colors">
                           <td className="px-4 py-3 text-gray-600 text-xs">#{slot.id}</td>
                           <td className="px-4 py-3 text-gray-300">{slot.service_name}</td>
                           <td className="px-4 py-3 text-gray-300">{formatDate(slot.date)}</td>
