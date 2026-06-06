@@ -1,6 +1,3 @@
-# ReservSmart – Système de Réservation Intelligent
-
-Projet de Fin d'Études (PFE) — Application web complète de gestion intelligente des réservations avec tarification dynamique.
 
 ## 🗂️ Structure du projet
 

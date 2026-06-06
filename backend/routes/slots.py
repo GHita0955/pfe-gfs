@@ -18,7 +18,6 @@ def _slot_occupancy(slot):
     ).count()
     return reserved / len(same_day)
 
-
 @slots_bp.route('/', methods=['GET'])
 def get_slots():
     service_id = request.args.get('service_id', type=int)
