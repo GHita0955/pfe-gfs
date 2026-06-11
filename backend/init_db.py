@@ -7,7 +7,7 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app import app
-from models import db, User, Service, TimeSlot, Reservation
+from models import db, User, Service, TimeSlot, Reservation, MenuItem
 from utils.pricing import calculate_price
 from datetime import date, timedelta
 import random
@@ -64,6 +64,55 @@ with app.app_context():
         s = Service(**sd)
         db.session.add(s)
         services.append(s)
+
+    # ── Menu restaurant (plats, desserts, jus) ─────────────────
+    menu_items = [
+        {
+            'name': 'Chicken Burger Maison',
+            'description': 'Poulet croustillant, cheddar, salade et sauce maison.',
+            'category': 'plat',
+            'price': 42.5,
+            'image_url': ''
+        },
+        {
+            'name': 'Pizza 4 Fromages',
+            'description': 'Mozzarella, gorgonzola, parmesan et emmental.',
+            'category': 'plat',
+            'price': 58.0,
+            'image_url': ''
+        },
+        {
+            'name': 'Tiramisu Classique',
+            'description': 'Dessert italien au café et mascarpone.',
+            'category': 'dessert',
+            'price': 24.0,
+            'image_url': ''
+        },
+        {
+            'name': 'Fondant Chocolat',
+            'description': 'Cœur coulant, servi tiède.',
+            'category': 'dessert',
+            'price': 26.0,
+            'image_url': ''
+        },
+        {
+            'name': 'Jus d’Orange Pressé',
+            'description': '100% frais, sans sucre ajouté.',
+            'category': 'jus',
+            'price': 14.0,
+            'image_url': ''
+        },
+        {
+            'name': 'Citronnade Menthe',
+            'description': 'Citron frais, menthe et glace.',
+            'category': 'jus',
+            'price': 16.0,
+            'image_url': ''
+        }
+    ]
+
+    for item in menu_items:
+        db.session.add(MenuItem(**item))
 
     db.session.flush()
 

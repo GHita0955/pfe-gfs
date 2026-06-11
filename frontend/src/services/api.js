@@ -65,4 +65,13 @@ export const dashboardAPI = {
   getRecentReservations: () => api.get('/dashboard/recent-reservations')
 }
 
+export const menuAPI = {
+  getAll: (params) => api.get('/menu/', { params }),
+  getAllAdmin: () => api.get('/menu/all'),
+  getOne: (id) => api.get(`/menu/${id}`),
+  create: (data) => api.post('/menu/', data),
+  update: (id, data) => api.put(`/menu/${id}`, data),
+  delete: (id) => api.delete(`/menu/${id}`)
+}
+
 export default api

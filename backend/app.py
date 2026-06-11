@@ -18,12 +18,14 @@ def create_app():
     from routes.slots import slots_bp
     from routes.services import services_bp
     from routes.dashboard import dashboard_bp
+    from routes.menu import menu_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(reservations_bp, url_prefix='/api/reservations')
     app.register_blueprint(slots_bp, url_prefix='/api/slots')
     app.register_blueprint(services_bp, url_prefix='/api/services')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(menu_bp, url_prefix='/api/menu')
 
     with app.app_context():
         db.create_all()

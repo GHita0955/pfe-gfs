@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
   { to: '/admin/reservations', label: 'Réservations', icon: '📋' },
   { to: '/admin/slots', label: 'Créneaux', icon: '🗓️' },
+  { to: '/admin/menu', label: 'Menu', icon: '🍽️' },
   { to: '/admin/services', label: 'Services', icon: '⚙️' },
 ]
 
@@ -53,10 +54,10 @@ export default function AdminLayout({ children }) {
           <p className="text-gold text-sm font-semibold">Boost Your Booking</p>
           <p className="text-xs text-gray-400 mt-1">Optimisez vos menus et créneaux depuis le dashboard.</p>
           <button
-            onClick={() => navigate('/admin/services')}
+            onClick={() => navigate('/admin/menu')}
             className="mt-3 w-full text-xs font-semibold bg-gold text-black rounded-lg py-2 hover:bg-gold-light transition-colors"
           >
-            Gérer Services
+            Gérer Menu
           </button>
         </div>
 

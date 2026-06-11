@@ -105,3 +105,28 @@ class Reservation(db.Model):
             'notes': self.notes,
             'created_at': self.created_at.isoformat()
         }
+
+
+class MenuItem(db.Model):
+    __tablename__ = 'menu_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(20), nullable=False)  # plat, dessert, jus
+    price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(255))
+    is_available = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'category': self.category,
+            'price': self.price,
+            'image_url': self.image_url,
+            'is_available': self.is_available,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }

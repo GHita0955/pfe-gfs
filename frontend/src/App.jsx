@@ -7,12 +7,14 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
+import Menu from './pages/Menu'
 import BookingPage from './pages/BookingPage'
 import MyReservations from './pages/MyReservations'
 import Dashboard from './pages/admin/Dashboard'
 import ManageReservations from './pages/admin/ManageReservations'
 import ManageSlots from './pages/admin/ManageSlots'
 import ManageServices from './pages/admin/ManageServices'
+import ManageMenu from './pages/admin/ManageMenu'
 
 function AppRoutes() {
   const location = useLocation()
@@ -24,6 +26,7 @@ function AppRoutes() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<Menu />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/book/:serviceId" element={
@@ -46,6 +49,9 @@ function AppRoutes() {
           } />
           <Route path="/admin/services" element={
             <ProtectedRoute adminOnly><ManageServices /></ProtectedRoute>
+          } />
+          <Route path="/admin/menu" element={
+            <ProtectedRoute adminOnly><ManageMenu /></ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

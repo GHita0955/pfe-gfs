@@ -35,6 +35,7 @@ export default function Navbar() {
 
         <ul className="hidden md:flex items-center gap-1">
           <li><NavLink to="/" end className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Accueil</NavLink></li>
+          <li><NavLink to="/menu" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Menu</NavLink></li>
           {!user && (<>
             <li><NavLink to="/login" className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Connexion</NavLink></li>
             <li><NavLink to="/register" className="btn-gold text-sm ml-2">S'inscrire</NavLink></li>
@@ -55,6 +56,7 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden bg-dark-100 border-t border-dark-400 px-4 py-3 space-y-1 animate-fade-in">
           <NavLink to="/" end onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Accueil</NavLink>
+          <NavLink to="/menu" onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Menu</NavLink>
           {!user && (<>
             <NavLink to="/login" onClick={() => setOpen(false)} className={({ isActive }) => `block px-4 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'text-gold bg-gold/10' : 'text-gray-400 hover:text-white hover:bg-dark-400'}`}>Connexion</NavLink>
             <NavLink to="/register" onClick={() => setOpen(false)} className="block btn-gold text-sm text-center mt-2">S'inscrire</NavLink>
