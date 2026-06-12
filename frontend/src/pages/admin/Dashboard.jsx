@@ -73,10 +73,10 @@ export default function Dashboard() {
     <AdminLayout>
       <div className="p-4 md:p-8 space-y-5 bg-[radial-gradient(circle_at_top_right,rgba(245,166,35,0.08),transparent_35%)]">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
-          <StatCard icon="💶" value={`${stats?.total_revenue || 0}€`} label="Today's Income" accent />
-          <StatCard icon="📋" value={stats?.confirmed_reservations || 0} label="Today's Orders" />
-          <StatCard icon="👥" value={stats?.total_clients || 0} label="Today's Customers" />
-          <StatCard icon="❌" value={stats?.cancelled_reservations || 0} label="Canceled Order" />
+          <StatCard icon="€" value={`${stats?.total_revenue || 0}€`} label="Today's Income" accent />
+          <StatCard icon="ORD" value={stats?.confirmed_reservations || 0} label="Today's Orders" />
+          <StatCard icon="CUS" value={stats?.total_clients || 0} label="Today's Customers" />
+          <StatCard icon="X" value={stats?.cancelled_reservations || 0} label="Canceled Order" />
         </div>
 
         <div className="grid grid-cols-12 gap-4">
@@ -105,7 +105,16 @@ export default function Dashboard() {
           <div className="col-span-12 md:col-span-6 lg:col-span-4 bg-gradient-to-b from-[#141417] to-[#0f1012] border border-[#242429] rounded-2xl p-4 md:p-5">
             <p className="text-white font-semibold text-sm mb-3">Weekly Best Seller Item</p>
             <div className="rounded-2xl bg-[#101114] border border-[#25262a] p-4 flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-b from-[#f6b24f] to-[#c98216] border-4 border-[#2a221b] mb-3" />
+              <img
+                src="https://th.bing.com/th/id/OIP.6-xQQU4QDb3PgZDqN9ooAQHaE7?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3"
+                alt="Chicken Burger"
+                className="w-24 h-24 rounded-full border-4 border-[#2a221b] object-cover mb-3"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.onerror = null
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=600&q=80'
+                }}
+              />
               <p className="text-white text-sm font-semibold">Chicken Burger</p>
               <p className="text-xs text-gray-500 mt-1">Top performing menu</p>
               <p className="text-gold font-bold mt-2">{recent?.[0]?.price ? `${recent[0].price}€` : '10.99€'}</p>
