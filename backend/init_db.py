@@ -72,42 +72,84 @@ with app.app_context():
             'description': 'Poulet croustillant, cheddar, salade et sauce maison.',
             'category': 'plat',
             'price': 42.5,
-            'image_url': ''
+            'image_url': 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=1200&q=80'
         },
         {
             'name': 'Pizza 4 Fromages',
             'description': 'Mozzarella, gorgonzola, parmesan et emmental.',
             'category': 'plat',
             'price': 58.0,
-            'image_url': ''
+            'image_url': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+            'name': 'Tajine de Poulet aux Citrons Confits',
+            'description': 'Tajine gourmand avec olives et citron confit.',
+            'category': 'plat',
+            'price': 72.0,
+            'image_url': 'https://images.unsplash.com/photo-1523986371872-9d3ba2e2f1a3?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+            'name': 'Couscous Royale',
+            'description': 'Semoule fine, légumes frais et viande tendre.',
+            'category': 'plat',
+            'price': 85.0,
+            'image_url': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80'
         },
         {
             'name': 'Tiramisu Classique',
             'description': 'Dessert italien au café et mascarpone.',
             'category': 'dessert',
             'price': 24.0,
-            'image_url': ''
+            'image_url': 'https://images.unsplash.com/photo-1514516870922-11fd3250df8d?auto=format&fit=crop&w=1200&q=80'
         },
         {
             'name': 'Fondant Chocolat',
             'description': 'Cœur coulant, servi tiède.',
             'category': 'dessert',
             'price': 26.0,
-            'image_url': ''
+            'image_url': 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+            'name': 'Crème Brûlée',
+            'description': 'Vanille onctueuse avec croûte caramelisée.',
+            'category': 'dessert',
+            'price': 28.0,
+            'image_url': 'https://images.unsplash.com/photo-1542327897-5a4aea37a7dd?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+            'name': 'Salade de Fruits Frais',
+            'description': 'Fruits de saison coupés, léger et rafraîchissant.',
+            'category': 'dessert',
+            'price': 22.0,
+            'image_url': 'https://images.unsplash.com/photo-1505253218056-5d0e0ddb8a5d?auto=format&fit=crop&w=1200&q=80'
         },
         {
             'name': 'Jus d’Orange Pressé',
             'description': '100% frais, sans sucre ajouté.',
             'category': 'jus',
             'price': 14.0,
-            'image_url': ''
+            'image_url': 'https://images.unsplash.com/photo-1547517026-5dffb0f338a9?auto=format&fit=crop&w=1200&q=80'
         },
         {
             'name': 'Citronnade Menthe',
             'description': 'Citron frais, menthe et glace.',
             'category': 'jus',
             'price': 16.0,
-            'image_url': ''
+            'image_url': 'https://images.unsplash.com/photo-1510626176961-4b9a4a0dee76?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+            'name': 'Jus de Mangue Tropical',
+            'description': 'Mangue mûre, ananas et une pointe de citron vert.',
+            'category': 'jus',
+            'price': 18.0,
+            'image_url': 'https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=1200&q=80'
+        },
+        {
+            'name': 'Smoothie Fraise-Banane',
+            'description': 'Fraise, banane et yaourt frais mixés.',
+            'category': 'jus',
+            'price': 19.0,
+            'image_url': 'https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=1200&q=80'
         }
     ]
 

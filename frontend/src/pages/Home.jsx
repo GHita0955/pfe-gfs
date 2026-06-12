@@ -2,19 +2,12 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { servicesAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
-
-const ICONS = ['🍽️', '⭐', '🎯', '🏆', '💡', '🔬']
-
-const FEATURES = [
-  { icon: '💰', title: 'Prix Dynamiques', desc: "Les tarifs s'adaptent selon la demande et le type de jour." },
-  { icon: '📊', title: 'Prévision demande', desc: "Identifiez les créneaux les plus demandés à l'avance." },
-  { icon: '🔔', title: 'Confirmation instantanée', desc: 'Votre réservation est confirmée immédiatement.' },
-  { icon: '🔄', title: 'Modification facile', desc: 'Modifiez ou annulez votre réservation à tout moment.' },
-]
+import Button from '../components/Button'
 
 export default function Home() {
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -23,94 +16,68 @@ export default function Home() {
       .then(res => setServices(res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
+
+    const t = setTimeout(() => setMounted(true), 80)
+    return () => clearTimeout(t)
   }, [])
 
   const handleBook = (serviceId) => navigate(user ? `/book/${serviceId}` : '/login')
+  const firstService = services[0]
 
   return (
-    <div className="min-h-screen bg-dark">
-      {/* Hero */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,166,35,0.08),transparent_70%)]" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-24 text-center relative">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-semibold uppercase tracking-widest mb-6">
-            ✦ Système Intelligent de Réservation
-          </div>
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-white leading-tight mb-6">
-            Réservez votre<br />
-            <span className="text-gold">expérience idéale</span>
-          </h1>
-          <p className="text-gray-400 text-lg max-w-xl mx-auto mb-10">
-            Des prix ajustés en temps réel selon la demande. Obtenez toujours la meilleure offre.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <span className="px-4 py-2 bg-dark-50 border border-dark-400 rounded-full text-sm text-gray-300">📈 Tarification dynamique</span>
-            <span className="px-4 py-2 bg-dark-50 border border-dark-400 rounded-full text-sm text-gray-300">🗓️ Créneaux optimisés</span>
-            <span className="px-4 py-2 bg-dark-50 border border-dark-400 rounded-full text-sm text-gray-300">⚡ Réservation instantanée</span>
-          </div>
-        </div>
-      </div>
+    <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-black text-white">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D')",
+        }}
+      />
+      <div className="absolute inset-0 bg-black/45" />
+      <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-black via-black/85 to-black/10 md:w-[68%]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_100%)] bg-[length:72px_100%] opacity-20" />
 
-      {/* Services */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-white">Nos Services</h2>
-            <p className="text-gray-500 text-sm mt-1">Choisissez le service qui vous convient</p>
-          </div>
-          {!user && (
-            <button className="btn-outline-gold text-sm hidden sm:flex" onClick={() => navigate('/login')}>
-              Se connecter
-            </button>
-          )}
-        </div>
+      <div
+        className={`relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col px-7 py-6 transition-all duration-700 sm:px-12 md:px-16 lg:px-20 ${
+          mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}
+      >
+        <div className="flex flex-1 items-center">
+          <div className="max-w-xl pt-16 text-left sm:pt-10">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-gold">
+                Fresh restaurant
+              </p>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-            <span className="text-gray-500 text-sm">Chargement des services…</span>
-          </div>
-        ) : services.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="text-5xl mb-4">📭</div>
-            <h3 className="text-white font-semibold text-lg mb-1">Aucun service disponible</h3>
-            <p className="text-gray-500 text-sm">Revenez bientôt !</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {services.map((service, idx) => (
-              <div key={service.id} className="card-dark hover:border-gold/30 hover:shadow-gold transition-all duration-300 flex flex-col group">
-                <div className="text-4xl mb-4">{ICONS[idx % ICONS.length]}</div>
-                <h3 className="text-white font-bold text-lg mb-2 group-hover:text-gold transition-colors">{service.name}</h3>
-                <p className="text-gray-500 text-sm mb-4 flex-1">{service.description || 'Aucune description disponible.'}</p>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs text-gray-500 bg-dark-300 px-3 py-1 rounded-full">⏱ {service.duration} min</span>
-                  <span className="text-gold font-bold text-sm">À partir de {service.base_price}€</span>
-                </div>
-                <button className="btn-gold w-full text-sm" onClick={() => handleBook(service.id)}>
-                  {user ? 'Réserver maintenant' : 'Se connecter & Réserver'}
-                </button>
+              <h1 className="font-serif text-4xl font-bold leading-tight text-white drop-shadow-2xl sm:text-5xl lg:text-6xl">
+                Perfect Ambience & Best Quality Food
+              </h1>
+
+              <p className="mt-5 max-w-md text-sm leading-7 text-white/70 sm:text-base">
+                Satisfy your cravings by getting the best quality food from us and enjoy it with your beloved ones.
+                Reserve your table and have a best experience in our place.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  onClick={() => firstService && handleBook(firstService.id)}
+                  disabled={loading || !firstService}
+                  className="w-full sm:w-auto"
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                      <path fillRule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  }
+                >
+                  {loading ? 'Loading...' : firstService ? 'Explore More' : 'Coming Soon'}
+                </Button>
+
+                <Button onClick={() => navigate('/menu')} variant="secondary" className="w-full sm:w-auto" icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}>
+                  View Menu
+                </Button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Features */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
-        <div className="border-t border-dark-400 pt-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">Pourquoi ReservSmart ?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {FEATURES.map(item => (
-              <div key={item.title} className="p-5 bg-dark-50 border border-dark-400 rounded-xl hover:border-gold/30 transition-colors">
-                <div className="text-3xl mb-3">{item.icon}</div>
-                <h4 className="text-white font-semibold mb-1">{item.title}</h4>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
