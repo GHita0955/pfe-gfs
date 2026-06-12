@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
 import Menu from './pages/Menu'
+import SelectTable from './pages/SelectTable'
 import BookingPage from './pages/BookingPage'
 import MyReservations from './pages/MyReservations'
 import Dashboard from './pages/admin/Dashboard'
@@ -27,6 +28,7 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/select-table" element={<SelectTable />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/book/:serviceId" element={

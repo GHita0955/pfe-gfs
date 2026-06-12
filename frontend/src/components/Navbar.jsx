@@ -42,11 +42,7 @@ export default function Navbar() {
           {isHome ? (
             'ReservSmart'
           ) : (
-            <>
-              <span className="w-2 h-2 rounded-full bg-gold inline-block" />
-              <span className="text-white">Reserv</span>
-              <span className="text-gold">Smart</span>
-            </>
+            <span className="text-white font-serif italic">ReservSmart</span>
           )}
         </Link>
 

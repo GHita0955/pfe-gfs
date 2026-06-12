@@ -86,14 +86,49 @@ with app.app_context():
             'description': 'Tajine gourmand avec olives et citron confit.',
             'category': 'plat',
             'price': 72.0,
-            'image_url': 'https://images.unsplash.com/photo-1523986371872-9d3ba2e2f1a3?auto=format&fit=crop&w=1200&q=80'
+            'image_url': 'https://newsgeet.com/wp-content/uploads/2024/12/Tajine-de-poulet-au-citron-confit-et-olives-1024x853.jpg'
         },
         {
             'name': 'Couscous Royale',
             'description': 'Semoule fine, légumes frais et viande tendre.',
             'category': 'plat',
             'price': 85.0,
-            'image_url': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80'
+            'image_url': 'https://www.albertmenes.fr/img/ybc_blog/post/thumb/16417759296490.jpg'
+        },
+        {
+            'name': 'Pastilla au Poulet',
+            'description': 'Pastilla marocaine feuilletée, poulet parfumé et amandes.',
+            'category': 'plat',
+            'price': 88.0,
+            'image_url': 'https://recettescarnees.com/wp-content/uploads/2025/10/recette-pastilla-au-poulet-marocaine.webp'
+        },
+        {
+            'name': 'Rfissa Traditionnelle',
+            'description': 'Poulet mijoté aux lentilles, msemen et épices marocaines.',
+            'category': 'plat',
+            'price': 82.0,
+            'image_url': 'https://saveursmarocaine.com/wp-content/uploads/2025/04/rfissa-marocaine.webp'
+        },
+        {
+            'name': 'Tanjia Marrakchia',
+            'description': 'Viande confite à la marrakchie, citron confit et épices douces.',
+            'category': 'plat',
+            'price': 96.0,
+            'image_url': 'https://th.bing.com/th/id/OIP.VYTWMKd-ab7pM_YenTzFoAHaE8?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3'
+        },
+        {
+            'name': 'Seffa Medfouna',
+            'description': 'Vermicelles sucrés-salés, poulet tendre, cannelle et amandes.',
+            'category': 'plat',
+            'price': 78.0,
+            'image_url': 'https://tse2.mm.bing.net/th/id/OIP.UIvQuf6vCKIy2jOGjR2MLQHaEy?rs=1&pid=ImgDetMain&o=7&rm=3'
+        },
+        {
+            'name': 'Mechoui d’Agneau',
+            'description': 'Agneau rôti lentement, servi avec cumin et sel traditionnel.',
+            'category': 'plat',
+            'price': 110.0,
+            'image_url': 'https://tse1.mm.bing.net/th/id/OIP.CTjVH-pmve6BXh_sVjq-hwHaEO?rs=1&pid=ImgDetMain&o=7&rm=3'
         },
         {
             'name': 'Tiramisu Classique',

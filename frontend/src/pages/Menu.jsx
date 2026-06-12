@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { menuAPI } from '../services/api'
 
-const CATEGORY_TABS = [
+const CATEGORIES = [
   { value: 'all', label: 'Tout le menu' },
   { value: 'plat', label: 'Plats' },
   { value: 'dessert', label: 'Desserts' },
@@ -33,6 +33,7 @@ export default function Menu() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('all')
+  const [selectedItem, setSelectedItem] = useState(null)
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -59,14 +60,14 @@ export default function Menu() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 rounded-3xl border border-gold/25 bg-gradient-to-r from-[#1a140f] via-[#131115] to-[#0f1310] p-6 md:p-8">
           <p className="text-xs uppercase tracking-[0.24em] text-gold/80">Restaurant Menu</p>
-          <h1 className="mt-2 text-3xl md:text-4xl font-bold text-white">Découvrez nos plats, desserts et jus</h1>
+          <h1 className="mt-2 text-3xl md:text-4xl font-bold text-white">Bienvenue chez ReservSmart</h1>
           <p className="mt-3 max-w-2xl text-sm text-gray-300">
-            Le client peut consulter le menu ici. L'admin peut ajouter et gérer tous les éléments depuis l'espace admin.
+            Dégustez des plats raffinés, préparés avec passion par nos meilleurs chefs pour une expérience culinaire exceptionnelle.
           </p>
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
-          {CATEGORY_TABS.map((tab) => (
+          {CATEGORIES.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
@@ -91,12 +92,13 @@ export default function Menu() {
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-sm text-red-300">{error}</div>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && filteredItems.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {filteredItems.map((item) => (
               <article
                 key={item.id}
-                className={`overflow-hidden rounded-2xl border bg-gradient-to-br shadow-xl shadow-black/20 ${CATEGORY_STYLE[item.category] || 'from-dark-200 to-dark-300 border-dark-400'}`}
+                onClick={() => setSelectedItem(item)}
+                className={`overflow-hidden rounded-2xl border bg-gradient-to-br shadow-xl shadow-black/20 cursor-pointer hover:scale-[1.02] transition-transform duration-200 ${CATEGORY_STYLE[item.category] || 'from-dark-200 to-dark-300 border-dark-400'}`}
               >
                 <div className="relative h-44">
                   <img
@@ -105,8 +107,7 @@ export default function Menu() {
                     className="h-full w-full object-cover"
                     loading="lazy"
                     onError={(e) => {
-                      e.currentTarget.onerror = null
-                      e.currentTarget.src = FALLBACK_BY_CATEGORY[item.category] || FALLBACK_BY_CATEGORY.plat
+                      e.currentTarget.src = FALLBACK_BY_CATEGORY[item.category]
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
@@ -114,6 +115,7 @@ export default function Menu() {
                     {CATEGORY_LABEL[item.category] || item.category}
                   </span>
                 </div>
+
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-4">
                     <h2 className="text-white font-bold text-lg leading-tight">{item.name}</h2>
@@ -137,6 +139,54 @@ export default function Menu() {
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {selectedItem && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.55)', padding: '16px' }}
+          onClick={() => setSelectedItem(null)}
+        >
+          <div
+            style={{ display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '680px', borderRadius: '16px', overflow: 'hidden', background: 'linear-gradient(135deg, #1a140f, #131115)', border: '1px solid rgba(245,166,35,0.2)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image */}
+            <div style={{ width: '260px', flexShrink: 0 }}>
+              <img
+                src={getImageUrl(selectedItem)}
+                alt={selectedItem.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onError={(e) => { e.currentTarget.src = FALLBACK_BY_CATEGORY[selectedItem.category] }}
+              />
+            </div>
+
+            {/* Details */}
+            <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <p style={{ fontSize: '10px', fontWeight: 600, color: '#F5A623', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>
+                {CATEGORY_LABEL[selectedItem.category] || selectedItem.category}
+              </p>
+              <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff', marginBottom: '8px', lineHeight: 1.3 }}>{selectedItem.name}</h2>
+              <p style={{ fontSize: '24px', fontWeight: 800, color: '#F5A623', marginBottom: '14px' }}>{Number(selectedItem.price).toFixed(2)} MAD</p>
+              <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: 1.8, marginBottom: '28px' }}>
+                {selectedItem.description || 'Préparation maison du chef avec des ingrédients frais et soigneusement sélectionnés.'}
+              </p>
+              <button
+                style={{ alignSelf: 'flex-start', backgroundColor: '#F5A623', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 28px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', marginBottom: '14px' }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d4891a'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#F5A623'}
+              >
+                Réserver
+              </button>
+              <button
+                onClick={() => setSelectedItem(null)}
+                style={{ alignSelf: 'flex-start', background: 'none', border: 'none', fontSize: '13px', color: '#6b7280', cursor: 'pointer', padding: 0 }}
+              >
+                ← Retour aux Menu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
