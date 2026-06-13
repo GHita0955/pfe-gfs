@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { menuAPI } from '../services/api'
 
 const CATEGORIES = [
@@ -34,6 +36,22 @@ export default function Menu() {
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('all')
   const [selectedItem, setSelectedItem] = useState(null)
+  const [showFullDescription, setShowFullDescription] = useState(false)
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  const handleReserve = (item = null) => {
+    if (!user) return navigate('/login')
+    navigate('/select-table', {
+      state: {
+        item,
+        serviceId: 1,
+        date: new Date().toISOString().split('T')[0],
+        time: '20:00',
+        guests: 2
+      }
+    })
+  }
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -64,6 +82,22 @@ export default function Menu() {
           <p className="mt-3 max-w-2xl text-sm text-gray-300">
             Dégustez des plats raffinés, préparés avec passion par nos meilleurs chefs pour une expérience culinaire exceptionnelle.
           </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-gold/40 hover:bg-white/10"
+            >
+              ← Retour
+            </button>
+            <button
+              type="button"
+              onClick={() => handleReserve()}
+              className="inline-flex items-center justify-center rounded-full bg-gold px-5 py-2 text-sm font-semibold text-black transition hover:bg-[#d89f18]"
+            >
+              Réserver
+            </button>
+          </div>
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
@@ -120,7 +154,18 @@ export default function Menu() {
                   <div className="flex items-start justify-between gap-4">
                     <h2 className="text-white font-bold text-lg leading-tight">{item.name}</h2>
                   </div>
-                  <p className="mt-2 text-sm text-gray-300 min-h-[40px]">{item.description || 'Préparation maison du chef.'}</p>
+                  <p
+                    className="mt-2 text-sm text-gray-300 min-h-[40px]"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {item.description || 'Préparation maison du chef.'}
+                  </p>
                   <div className="mt-4 flex items-end justify-between">
                     <span className="text-xs uppercase tracking-wider text-gray-400">Prix</span>
                     <span className="text-gold text-2xl font-extrabold">{Number(item.price).toFixed(2)} MAD</span>
@@ -151,7 +196,38 @@ export default function Menu() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
-            <div style={{ width: '260px', flexShrink: 0 }}>
+            <div style={{ width: '260px', flexShrink: 0, position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedItem(null)
+                  setShowFullDescription(false)
+                }}
+                aria-label="Retour au menu"
+                style={{
+                  position: 'absolute',
+                  top: '14px',
+                  left: '14px',
+                  zIndex: 10,
+                  background: 'rgba(0,0,0,0.65)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  color: '#fff',
+                  borderRadius: '999px',
+                  minWidth: '90px',
+                  height: '38px',
+                  padding: '0 14px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  letterSpacing: '0.02em'
+                }}
+              >
+                ← Retour
+              </button>
               <img
                 src={getImageUrl(selectedItem)}
                 alt={selectedItem.name}
@@ -167,18 +243,32 @@ export default function Menu() {
               </p>
               <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff', marginBottom: '8px', lineHeight: 1.3 }}>{selectedItem.name}</h2>
               <p style={{ fontSize: '24px', fontWeight: 800, color: '#F5A623', marginBottom: '14px' }}>{Number(selectedItem.price).toFixed(2)} MAD</p>
-              <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: 1.8, marginBottom: '28px' }}>
-                {selectedItem.description || 'Préparation maison du chef avec des ingrédients frais et soigneusement sélectionnés.'}
-              </p>
+              <div style={{ marginBottom: '28px' }}>
+                <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: 1.8, maxHeight: showFullDescription ? 'none' : '3.6em', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: showFullDescription ? 'none' : 3, WebkitBoxOrient: 'vertical' }}>
+                  {selectedItem.description || 'Préparation maison du chef avec des ingrédients frais et soigneusement sélectionnés.'}
+                </p>
+                {selectedItem.description && selectedItem.description.length > 120 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowFullDescription((prev) => !prev)}
+                    style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', padding: 0, fontSize: '13px', fontWeight: 600, marginTop: '8px' }}
+                  >
+                    {showFullDescription ? 'Voir moins' : 'Voir plus'}
+                  </button>
+                )}
+              </div>
               <button
+                type="button"
+                onClick={() => handleReserve(selectedItem)}
                 style={{ alignSelf: 'flex-start', backgroundColor: '#F5A623', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 28px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', marginBottom: '14px' }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d4891a'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#F5A623'}
               >
                 Réserver
               </button>
               <button
-                onClick={() => setSelectedItem(null)}
+                onClick={() => {
+                  setSelectedItem(null)
+                  setShowFullDescription(false)
+                }}
                 style={{ alignSelf: 'flex-start', background: 'none', border: 'none', fontSize: '13px', color: '#6b7280', cursor: 'pointer', padding: 0 }}
               >
                 ← Retour aux Menu

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FiCalendar, FiClock, FiUsers, FiCheckCircle } from 'react-icons/fi'
 import { IoRestaurantOutline } from 'react-icons/io5'
 
@@ -20,10 +20,13 @@ const TABLES = [
 
 export default function SelectTable() {
   const location = useLocation()
+  const navigate = useNavigate()
   const state = location.state || {}
 
   const [selectedTableId, setSelectedTableId] = useState(null)
-  const [isConfirmed, setIsConfirmed] = useState(false)
+
+  const item = state.item
+  const serviceId = state.serviceId
 
   const summary = useMemo(
     () => ({
@@ -42,126 +45,153 @@ export default function SelectTable() {
   const handleSelect = (table) => {
     if (table.status === 'reserved') return
     setSelectedTableId(table.id)
-    setIsConfirmed(false)
+  }
+
+  const handleContinue = () => {
+    if (!selectedTable) return
+
+    const targetServiceId = serviceId || 1
+    navigate(`/book/${targetServiceId}`, {
+      state: {
+        ...summary,
+        item,
+        tableNumber: selectedTable.number
+      }
+    })
   }
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-[#121212] text-white px-4 py-8 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 md:mb-8 rounded-3xl border border-[#ffffff1f] bg-white/[0.03] backdrop-blur-xl p-5 md:p-7">
-          <p className="text-xs tracking-[0.24em] uppercase text-[#FF6B00]">Select Your Table</p>
-          <h1 className="text-2xl md:text-4xl font-bold mt-2">Choose your perfect table</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-2xl">
-            Pick one available table on the floor map. Reserved tables are locked. Your final choice appears in the reservation summary.
-          </p>
+    <section className="min-h-[calc(100vh-4rem)] bg-[#060606] text-white px-4 py-8 md:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 rounded-[32px] border border-white/10 bg-[#121212]/80 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.28em] text-gold/80">Place in hall</p>
+              <h1 className="mt-2 text-3xl font-semibold text-white">Réservez votre table</h1>
+              <p className="mt-3 max-w-xl text-sm text-gray-400">Sélectionnez une table disponible sur le plan, puis confirmez pour continuer votre réservation.</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
+              <div className="rounded-3xl border border-white/10 bg-[#171717]/80 px-4 py-3 text-center">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-gray-500">Libre</p>
+                <div className="mt-3 mx-auto h-10 w-10 rounded-full border border-white/10 bg-[#1f1f1f]" />
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-[#171717]/80 px-4 py-3 text-center">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-gray-500">Sélectionnée</p>
+                <div className="mt-3 mx-auto h-10 w-10 rounded-full bg-gold shadow-[0_0_0_6px_rgba(245,166,35,0.18)]" />
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-[#171717]/80 px-4 py-3 text-center">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-gray-500">Réservée</p>
+                <div className="mt-3 mx-auto h-10 w-10 rounded-full bg-[#3b3b3b]" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5 md:gap-6">
-          <div className="rounded-3xl border border-[#ffffff1a] bg-[#1E1E1E]/85 backdrop-blur-2xl p-4 md:p-6 overflow-hidden">
-            <div className="flex items-center justify-between mb-4 md:mb-5">
-              <h2 className="text-base md:text-lg font-semibold flex items-center gap-2">
-                <IoRestaurantOutline className="text-[#FF6B00]" />
-                Restaurant Floor Plan
-              </h2>
-              <div className="hidden md:flex items-center gap-4 text-xs text-white/70">
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full border border-white inline-block" /> Available</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#FF6B00] inline-block" /> Selected</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#555] inline-block" /> Reserved</span>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6">
+          <div className="rounded-[32px] border border-white/10 bg-[#101010]/90 p-5 md:p-6 overflow-hidden">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-gray-500">Plan de la salle</p>
+                <h2 className="mt-2 text-xl font-semibold text-white">Sélectionnez votre table</h2>
+              </div>
+              <div className="hidden md:flex items-center gap-4 text-sm text-gray-400">
+                <span className="inline-flex h-3 w-3 rounded-full bg-[#1f1f1f] ring-1 ring-white/10" /> Disponible
+                <span className="inline-flex h-3 w-3 rounded-full bg-gold" /> Sélectionnée
+                <span className="inline-flex h-3 w-3 rounded-full bg-[#3b3b3b]" /> Réservée
               </div>
             </div>
 
-            <div className="relative h-[520px] md:h-[600px] rounded-2xl border border-[#ffffff12] bg-[radial-gradient(circle_at_20%_20%,rgba(255,107,0,0.10),transparent_36%),radial-gradient(circle_at_80%_75%,rgba(255,255,255,0.05),transparent_34%),#161616]">
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-[11px] tracking-widest uppercase border border-[#ffffff20] bg-black/35 text-white/80">
-                Entrance
+            <div className="relative rounded-[28px] border border-white/10 bg-[#090909] px-4 py-6">
+              <div className="absolute left-1/2 top-5 -translate-x-1/2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-gray-400">
+                Entrée
               </div>
+              <div className="absolute inset-x-6 top-24 h-px bg-white/5" />
+              <div className="absolute inset-x-6 bottom-24 h-px bg-white/5" />
+              <div className="relative h-[520px] md:h-[560px]">
+                {TABLES.map((table) => {
+                  const isSelected = selectedTableId === table.id
+                  const isReserved = table.status === 'reserved'
+                  const baseShape = table.shape === 'round' ? 'rounded-full' : 'rounded-[24px]'
+                  const sizeCls = table.shape === 'round' ? 'w-[76px] h-[76px]' : 'w-[98px] h-[70px]'
 
-              <div className="absolute inset-5 rounded-2xl border border-dashed border-[#ffffff14]" />
+                  const stateCls = isReserved
+                    ? 'bg-[#2c2c2c] border-[#444] text-[#8d8d8d] cursor-not-allowed opacity-80'
+                    : isSelected
+                    ? 'bg-gold border-gold text-black shadow-[0_0_0_12px_rgba(245,166,35,0.18)]'
+                    : 'bg-[#121212] border border-white/10 text-white hover:border-gold hover:shadow-[0_0_0_10px_rgba(245,166,35,0.12)]'
 
-              {TABLES.map((table) => {
-                const isSelected = selectedTableId === table.id
-                const isReserved = table.status === 'reserved'
-                const baseShape = table.shape === 'round' ? 'rounded-full' : 'rounded-xl'
-                const sizeCls = table.shape === 'round' ? 'w-[76px] h-[76px]' : 'w-[96px] h-[68px]'
+                  const glowStyle = isSelected
+                    ? { boxShadow: '0 0 0 10px rgba(245,166,35,0.14)' }
+                    : {}
 
-                const stateCls = isReserved
-                  ? 'bg-[#2e2e2e] border-[#5a5a5a] text-[#9a9a9a] cursor-not-allowed opacity-70'
-                  : isSelected
-                  ? 'bg-[#FF6B00] border-[#FF6B00] text-white scale-105'
-                  : 'bg-[#1E1E1E] border-white text-white hover:border-[#FF6B00] hover:-translate-y-0.5'
-
-                const glowStyle = isSelected
-                  ? { boxShadow: '0 0 0 4px rgba(255,107,0,0.24), 0 0 28px rgba(255,107,0,0.45)' }
-                  : {}
-
-                return (
-                  <button
-                    key={table.id}
-                    type="button"
-                    disabled={isReserved}
-                    onClick={() => handleSelect(table)}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 border-2 ${baseShape} ${sizeCls} transition-all duration-300 ease-out ${stateCls}`}
-                    style={{ left: `${table.x}%`, top: `${table.y}%`, ...glowStyle }}
-                    aria-label={`Table ${table.number}`}
-                  >
-                    <div className="text-center leading-tight">
-                      <p className="text-[10px] md:text-[11px] opacity-80">Table</p>
-                      <p className="font-bold text-sm md:text-base">{table.number}</p>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="md:hidden mt-4 grid grid-cols-3 gap-2 text-[11px] text-white/75">
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full border border-white inline-block" /> Available</span>
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#FF6B00] inline-block" /> Selected</span>
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#555] inline-block" /> Reserved</span>
+                  return (
+                    <button
+                      key={table.id}
+                      type="button"
+                      disabled={isReserved}
+                      onClick={() => handleSelect(table)}
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 border-2 ${baseShape} ${sizeCls} flex items-center justify-center text-center transition-all duration-300 ease-out ${stateCls}`}
+                      style={{ left: `${table.x}%`, top: `${table.y}%`, ...glowStyle }}
+                      aria-label={`Table ${table.number}`}
+                    >
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.24em] text-gray-400">{table.shape === 'round' ? 'Table' : 'Banquette'}</p>
+                        <p className="mt-1 text-sm font-semibold">{table.number}</p>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-[#ffffff1a] bg-[#1E1E1E]/85 backdrop-blur-2xl p-5 md:p-6 h-fit xl:sticky xl:top-20">
-            <h2 className="text-lg font-semibold mb-4 md:mb-5">Reservation Summary</h2>
-
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-[#ffffff14] bg-white/[0.03] px-4 py-3 flex items-center justify-between">
-                <span className="text-white/70 text-sm flex items-center gap-2"><FiCalendar /> Date</span>
-                <span className="font-semibold text-sm">{summary.date}</span>
-              </div>
-
-              <div className="rounded-2xl border border-[#ffffff14] bg-white/[0.03] px-4 py-3 flex items-center justify-between">
-                <span className="text-white/70 text-sm flex items-center gap-2"><FiClock /> Time</span>
-                <span className="font-semibold text-sm">{summary.time}</span>
-              </div>
-
-              <div className="rounded-2xl border border-[#ffffff14] bg-white/[0.03] px-4 py-3 flex items-center justify-between">
-                <span className="text-white/70 text-sm flex items-center gap-2"><FiUsers /> Guests</span>
-                <span className="font-semibold text-sm">{summary.guests}</span>
-              </div>
-
-              <div className="rounded-2xl border border-[#ffffff14] bg-white/[0.03] px-4 py-3 flex items-center justify-between">
-                <span className="text-white/70 text-sm">Selected Table</span>
-                <span className={`font-bold text-sm ${selectedTable ? 'text-[#FF6B00]' : 'text-white/60'}`}>
-                  {selectedTable ? selectedTable.number : 'Not selected'}
-                </span>
-              </div>
+          <aside className="rounded-[32px] border border-white/10 bg-[#101010]/90 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+            <div className="mb-5 rounded-[28px] border border-white/10 bg-[#121212]/80 p-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-gray-500">Réservation</p>
+              <h3 className="mt-3 text-xl font-semibold text-white">Résumé</h3>
             </div>
 
-            {isConfirmed && selectedTable && (
-              <div className="mt-4 rounded-2xl border border-[#FF6B0055] bg-[#FF6B0018] px-4 py-3 text-sm flex items-center gap-2">
-                <FiCheckCircle className="text-[#FF6B00]" />
-                Table {selectedTable.number} is selected successfully.
+            <div className="space-y-4">
+              <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Date</p>
+                <p className="mt-2 text-sm font-medium text-white">{summary.date}</p>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Heure</p>
+                <p className="mt-2 text-sm font-medium text-white">{summary.time}</p>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Personnes</p>
+                <p className="mt-2 text-sm font-medium text-white">{summary.guests}</p>
+              </div>
+              {item && (
+              <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Menu choisi</p>
+                <p className="mt-2 text-sm font-semibold text-white">{item.name}</p>
               </div>
             )}
+            <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Table sélectionnée</p>
+                <p className={`mt-2 text-sm font-semibold ${selectedTable ? 'text-gold' : 'text-gray-500'}`}>
+                  {selectedTable ? selectedTable.number : 'Aucune table'}
+                </p>
+              </div>
+            </div>
 
             <button
               type="button"
               disabled={!selectedTable}
-              onClick={() => setIsConfirmed(true)}
-              className="mt-5 w-full rounded-2xl bg-[#FF6B00] px-4 py-4 text-base font-semibold text-white transition-all duration-300 hover:brightness-110 hover:-translate-y-0.5 disabled:opacity-45 disabled:cursor-not-allowed"
-              style={selectedTable ? { boxShadow: '0 14px 30px rgba(255,107,0,0.35)' } : {}}
+              onClick={handleContinue}
+              className="mt-8 w-full rounded-[24px] bg-gold px-5 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-black transition hover:bg-[#d89f18] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Confirm Reservation
+              Continuer vers la réservation
             </button>
+
+            {selectedTable && (
+              <div className="mt-4 rounded-[24px] border border-gold/20 bg-gold/10 px-4 py-3 text-sm text-gold">
+                Table {selectedTable.number} prête à être réservée.
+              </div>
+            )}
           </aside>
         </div>
       </div>
