@@ -76,7 +76,12 @@ export default function Menu() {
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_top,rgba(245,166,35,0.12),transparent_40%),linear-gradient(180deg,#070707_0%,#0d0d0f_100%)] px-4 py-10 md:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 rounded-3xl border border-gold/25 bg-gradient-to-r from-[#1a140f] via-[#131115] to-[#0f1310] p-6 md:p-8">
+        <div
+          className="mb-8 rounded-3xl border border-gold/25 bg-cover bg-center p-6 md:p-8"
+          style={{
+            backgroundImage: "linear-gradient(180deg, rgba(10, 10, 10, 0.75), rgba(10, 10, 10, 0.65)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80')"
+          }}
+        >
           <p className="text-xs uppercase tracking-[0.24em] text-gold/80">Restaurant Menu</p>
           <h1 className="mt-2 text-3xl md:text-4xl font-bold text-white">Bienvenue chez ReservSmart</h1>
           <p className="mt-3 max-w-2xl text-sm text-gray-300">
@@ -154,18 +159,6 @@ export default function Menu() {
                   <div className="flex items-start justify-between gap-4">
                     <h2 className="text-white font-bold text-lg leading-tight">{item.name}</h2>
                   </div>
-                  <p
-                    className="mt-2 text-sm text-gray-300 min-h-[40px]"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {item.description || 'Préparation maison du chef.'}
-                  </p>
                   <div className="mt-4 flex items-end justify-between">
                     <span className="text-xs uppercase tracking-wider text-gray-400">Prix</span>
                     <span className="text-gold text-2xl font-extrabold">{Number(item.price).toFixed(2)} MAD</span>
