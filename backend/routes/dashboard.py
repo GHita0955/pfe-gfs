@@ -1,10 +1,12 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, send_file
 from flask_jwt_extended import jwt_required
-from models import db, User, Reservation, TimeSlot
-from utils.forecasting import get_demand_forecast
+from models import db, User, Reservation, TimeSlot, Statistique
+from utils.forecasting import get_demand_forecast, refresh_statistiques
 from utils.decorators import admin_required
+from utils.pdf import build_simple_pdf
 from datetime import date, timedelta
 from collections import defaultdict
+from io import BytesIO
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -158,6 +160,57 @@ def get_forecast():
     reservations = Reservation.query.all()
     forecast = get_demand_forecast(reservations, days_ahead=14)
     return jsonify(forecast), 200
+
+
+@dashboard_bp.route('/refresh-statistics', methods=['POST'])
+@jwt_required()
+@admin_required
+def refresh_statistics():
+    reservations = Reservation.query.all()
+    result = refresh_statistiques(db, Statistique, reservations)
+    return jsonify(result), 200
+
+
+@dashboard_bp.route('/statistics', methods=['GET'])
+@jwt_required()
+@admin_required
+def get_statistics():
+    stats = Statistique.query.order_by(
+        Statistique.metric_date.desc(),
+        Statistique.metric_type,
+        Statistique.label
+    ).limit(200).all()
+    return jsonify([s.to_dict() for s in stats]), 200
+
+
+@dashboard_bp.route('/report.pdf', methods=['GET'])
+@jwt_required()
+@admin_required
+def admin_report_pdf():
+    total_res = Reservation.query.count()
+    confirmed = Reservation.query.filter_by(status='confirmed').count()
+    cancelled = Reservation.query.filter_by(status='cancelled').count()
+    revenue = db.session.query(db.func.sum(Reservation.price)).filter_by(status='confirmed').scalar() or 0.0
+    off_peak = Statistique.query.filter_by(metric_type='hourly_demand').all()
+    off_peak_labels = [
+        s.label for s in off_peak
+        if s.details and '"is_off_peak": true' in s.details.lower()
+    ]
+    lines = [
+        f"Date rapport: {date.today().isoformat()}",
+        f"Reservations totales: {total_res}",
+        f"Reservations confirmees: {confirmed}",
+        f"Reservations annulees: {cancelled}",
+        f"Revenu confirme: {round(revenue, 2)}",
+        f"Heures creuses: {', '.join(off_peak_labels) if off_peak_labels else '-'}",
+    ]
+    pdf = build_simple_pdf("Rapport admin reservations", lines)
+    return send_file(
+        BytesIO(pdf),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f"rapport-admin-{date.today().isoformat()}.pdf"
+    )
 
 
 @dashboard_bp.route('/recent-reservations', methods=['GET'])

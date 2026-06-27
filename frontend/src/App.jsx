@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import { ConfirmProvider } from './components/ConfirmModal'
 import Navbar from './components/Navbar'
+import ChatbotAssistant from './components/ChatbotAssistant'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -58,6 +59,7 @@ function AppRoutes() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      {!isAdminRoute && <ChatbotAssistant />}
     </>
   )
 }

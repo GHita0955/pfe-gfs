@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import date, timedelta
+import json
 
 
 def get_demand_forecast(reservations, days_ahead=14):
@@ -80,3 +81,82 @@ def get_monthly_stats(reservations):
             monthly[key]['revenue'] += r.price
 
     return dict(monthly)
+
+
+def get_hourly_demand_stats(reservations):
+    """
+    Calcule la demande par heure et identifie les heures creuses.
+    """
+    hourly = defaultdict(lambda: {'count': 0, 'revenue': 0.0})
+
+    for r in reservations:
+        if not r.slot or r.status == 'cancelled':
+            continue
+        hour = (r.slot.start_time or '00:00')[:2] + ':00'
+        hourly[hour]['count'] += 1
+        hourly[hour]['revenue'] += r.price or 0.0
+
+    if not hourly:
+        return []
+
+    avg_count = sum(item['count'] for item in hourly.values()) / len(hourly)
+    result = []
+    for hour in sorted(hourly):
+        count = hourly[hour]['count']
+        level = 'low' if count <= avg_count * 0.75 else 'high' if count >= avg_count * 1.25 else 'medium'
+        result.append({
+            'hour': hour,
+            'count': count,
+            'revenue': round(hourly[hour]['revenue'], 2),
+            'level': level,
+            'is_off_peak': level == 'low'
+        })
+    return result
+
+
+def refresh_statistiques(db, Statistique, reservations, target_date=None):
+    """
+    Alimente la table Statistique avec les heures creuses et la prévision.
+    """
+    metric_date = target_date or date.today()
+    hourly_stats = get_hourly_demand_stats(reservations)
+    forecast = get_demand_forecast(reservations, days_ahead=14)
+
+    rows = []
+    for item in hourly_stats:
+        rows.append({
+            'metric_date': metric_date,
+            'metric_type': 'hourly_demand',
+            'label': item['hour'],
+            'value': item['count'],
+            'details': json.dumps(item, ensure_ascii=False)
+        })
+
+    for item in forecast:
+        rows.append({
+            'metric_date': date.fromisoformat(item['date']),
+            'metric_type': 'forecast',
+            'label': item['level'],
+            'value': item['demand_score'],
+            'details': json.dumps(item, ensure_ascii=False)
+        })
+
+    for row in rows:
+        stat = Statistique.query.filter_by(
+            metric_date=row['metric_date'],
+            metric_type=row['metric_type'],
+            label=row['label']
+        ).first()
+        if not stat:
+            stat = Statistique(**row)
+            db.session.add(stat)
+        else:
+            stat.value = row['value']
+            stat.details = row['details']
+
+    db.session.commit()
+    return {
+        'updated': len(rows),
+        'hourly_demand': hourly_stats,
+        'forecast': forecast
+    }

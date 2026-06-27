@@ -49,11 +49,13 @@ export const slotsAPI = {
 }
 
 export const reservationsAPI = {
-  getAll: () => api.get('/reservations/'),
+  getAll: (params) => api.get('/reservations/', { params }),
   getOne: (id) => api.get(`/reservations/${id}`),
   create: (data) => api.post('/reservations/', data),
   cancel: (id) => api.put(`/reservations/${id}/cancel`),
-  update: (id, data) => api.put(`/reservations/${id}`, data)
+  update: (id, data) => api.put(`/reservations/${id}`, data),
+  qr: (id) => api.get(`/reservations/${id}/qr`, { responseType: 'blob' }),
+  receipt: (id) => api.get(`/reservations/${id}/receipt.pdf`, { responseType: 'blob' })
 }
 
 export const dashboardAPI = {
@@ -62,7 +64,10 @@ export const dashboardAPI = {
   getOccupancyChart: () => api.get('/dashboard/occupancy-chart'),
   getStatusChart: () => api.get('/dashboard/status-chart'),
   getForecast: () => api.get('/dashboard/forecast'),
-  getRecentReservations: () => api.get('/dashboard/recent-reservations')
+  getRecentReservations: () => api.get('/dashboard/recent-reservations'),
+  refreshStatistics: () => api.post('/dashboard/refresh-statistics'),
+  getStatistics: () => api.get('/dashboard/statistics'),
+  report: () => api.get('/dashboard/report.pdf', { responseType: 'blob' })
 }
 
 export const menuAPI = {
@@ -72,6 +77,10 @@ export const menuAPI = {
   create: (data) => api.post('/menu/', data),
   update: (id, data) => api.put(`/menu/${id}`, data),
   delete: (id) => api.delete(`/menu/${id}`)
+}
+
+export const searchAPI = {
+  advanced: (params) => api.get('/search/advanced', { params })
 }
 
 export default api

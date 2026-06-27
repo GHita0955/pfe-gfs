@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FiArrowLeft, FiSearch, FiX } from 'react-icons/fi'
+import { IoRestaurantOutline } from 'react-icons/io5'
 import { useAuth } from '../context/AuthContext'
 import { menuAPI } from '../services/api'
 
@@ -35,6 +37,7 @@ export default function Menu() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [selectedItem, setSelectedItem] = useState(null)
   const [showFullDescription, setShowFullDescription] = useState(false)
   const navigate = useNavigate()
@@ -69,9 +72,25 @@ export default function Menu() {
   }, [])
 
   const filteredItems = useMemo(() => {
-    if (activeTab === 'all') return items
-    return items.filter((item) => item.category === activeTab)
-  }, [items, activeTab])
+    const q = searchTerm.trim().toLowerCase()
+    return items.filter((item) => {
+      const matchesCategory = activeTab === 'all' || item.category === activeTab
+      const matchesSearch = !q || [
+        item.name,
+        item.description,
+        CATEGORY_LABEL[item.category],
+        item.category,
+        `${Number(item.price).toFixed(2)} MAD`
+      ].some((value) => String(value || '').toLowerCase().includes(q))
+
+      return matchesCategory && matchesSearch
+    })
+  }, [items, activeTab, searchTerm])
+
+  const resetFilters = () => {
+    setActiveTab('all')
+    setSearchTerm('')
+  }
 
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_top,rgba(245,166,35,0.12),transparent_40%),linear-gradient(180deg,#070707_0%,#0d0d0f_100%)] px-4 py-10 md:px-8">
@@ -79,51 +98,79 @@ export default function Menu() {
         <div
           className="mb-8 rounded-3xl border border-gold/25 bg-cover bg-center p-6 md:p-8"
           style={{
-            backgroundImage: "linear-gradient(180deg, rgba(10, 10, 10, 0.75), rgba(10, 10, 10, 0.65)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80')"
+            backgroundImage: "linear-gradient(180deg, rgba(10, 10, 10, 0.78), rgba(10, 10, 10, 0.68)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80')"
           }}
         >
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mb-5 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-4 py-2 text-sm font-semibold text-white transition hover:border-gold/40 hover:text-gold"
+          >
+            <FiArrowLeft />
+            Retour
+          </button>
           <p className="text-xs uppercase tracking-[0.24em] text-gold/80">Restaurant Menu</p>
-          <h1 className="mt-2 text-3xl md:text-4xl font-bold text-white">Bienvenue chez ReservSmart</h1>
-          <p className="mt-3 max-w-2xl text-sm text-gray-300">
-            Dégustez des plats raffinés, préparés avec passion par nos meilleurs chefs pour une expérience culinaire exceptionnelle.
+          <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">Bienvenue chez ReservSmart</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">
+            Degustez des plats raffines, prepares avec passion par nos meilleurs chefs pour une experience culinaire exceptionnelle.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-gold/40 hover:bg-white/10"
-            >
-              ← Retour
-            </button>
-            <button
-              type="button"
               onClick={() => handleReserve()}
-              className="inline-flex items-center justify-center rounded-full bg-gold px-5 py-2 text-sm font-semibold text-black transition hover:bg-[#d89f18]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-gold-dark"
             >
-              Réserver
+              <IoRestaurantOutline />
+              Reserver une table
             </button>
           </div>
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {CATEGORIES.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
-                activeTab === tab.value
-                  ? 'border-gold/40 text-gold bg-gold/10'
-                  : 'border-dark-400 text-gray-400 hover:text-white hover:border-gold/20'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="mb-6 rounded-2xl border border-dark-400 bg-dark-100/80 p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative flex-1">
+              <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="search"
+                className="input-dark pl-11 pr-24 text-sm"
+                placeholder="Rechercher un plat, dessert, jus, prix..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-white/5 hover:text-white"
+                >
+                  <FiX />
+                  Effacer
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-all ${
+                    activeTab === tab.value
+                      ? 'border-gold/40 bg-gold/10 text-gold'
+                      : 'border-dark-400 text-gray-400 hover:border-gold/20 hover:text-white'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {loading && (
           <div className="flex justify-center py-16">
-            <div className="w-9 h-9 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-gold border-t-transparent" />
           </div>
         )}
 
@@ -132,64 +179,78 @@ export default function Menu() {
         )}
 
         {!loading && !error && filteredItems.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-            {filteredItems.map((item) => (
-              <article
-                key={item.id}
-                onClick={() => setSelectedItem(item)}
-                className={`overflow-hidden rounded-2xl border bg-gradient-to-br shadow-xl shadow-black/20 cursor-pointer hover:scale-[1.02] transition-transform duration-200 ${CATEGORY_STYLE[item.category] || 'from-dark-200 to-dark-300 border-dark-400'}`}
-              >
-                <div className="relative h-44">
-                  <img
-                    src={getImageUrl(item)}
-                    alt={item.name}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.src = FALLBACK_BY_CATEGORY[item.category]
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  <span className="absolute top-3 right-3 rounded-lg bg-black/55 border border-white/20 px-2.5 py-1 text-xs font-semibold text-gray-100">
-                    {CATEGORY_LABEL[item.category] || item.category}
-                  </span>
-                </div>
+          <>
+            <p className="mb-4 text-sm text-gray-400">
+              {filteredItems.length} resultat{filteredItems.length > 1 ? 's' : ''} trouve{filteredItems.length > 1 ? 's' : ''}
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3">
+              {filteredItems.map((item) => (
+                <article
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedItem(item)
+                    setShowFullDescription(false)
+                  }}
+                  className={`cursor-pointer overflow-hidden rounded-2xl border bg-gradient-to-br shadow-xl shadow-black/20 transition-transform duration-200 hover:scale-[1.02] ${CATEGORY_STYLE[item.category] || 'from-dark-200 to-dark-300 border-dark-400'}`}
+                >
+                  <div className="relative h-44">
+                    <img
+                      src={getImageUrl(item)}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = FALLBACK_BY_CATEGORY[item.category]
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <span className="absolute right-3 top-3 rounded-lg border border-white/20 bg-black/55 px-2.5 py-1 text-xs font-semibold text-gray-100">
+                      {CATEGORY_LABEL[item.category] || item.category}
+                    </span>
+                  </div>
 
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <h2 className="text-white font-bold text-lg leading-tight">{item.name}</h2>
+                  <div className="p-5">
+                    <h2 className="text-lg font-bold leading-tight text-white">{item.name}</h2>
+                    <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm leading-5 text-gray-400">
+                      {item.description || 'Preparation maison du chef avec des ingredients frais.'}
+                    </p>
+                    <div className="mt-4 flex items-end justify-between gap-4">
+                      <span className="text-xs uppercase tracking-wider text-gray-400">Prix</span>
+                      <span className="text-2xl font-extrabold text-gold">{Number(item.price).toFixed(2)} MAD</span>
+                    </div>
                   </div>
-                  <div className="mt-4 flex items-end justify-between">
-                    <span className="text-xs uppercase tracking-wider text-gray-400">Prix</span>
-                    <span className="text-gold text-2xl font-extrabold">{Number(item.price).toFixed(2)} MAD</span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          </>
         )}
 
         {!loading && !error && filteredItems.length === 0 && (
           <div className="rounded-2xl border border-dark-400 bg-dark-200 px-6 py-12 text-center">
-            <p className="text-4xl mb-2">🍽️</p>
-            <p className="text-white font-semibold">Aucun élément pour cette catégorie</p>
-            <p className="text-sm text-gray-500 mt-1">L'admin peut ajouter de nouveaux plats depuis le dashboard.</p>
+            <IoRestaurantOutline className="mx-auto mb-3 text-4xl text-gold" />
+            <p className="font-semibold text-white">Aucun element trouve</p>
+            <p className="mt-1 text-sm text-gray-500">Essayez un autre mot, une autre categorie ou reinitialisez la recherche.</p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-5 rounded-xl border border-gold/30 bg-gold/10 px-4 py-2 text-sm font-semibold text-gold hover:bg-gold/15"
+            >
+              Reinitialiser
+            </button>
           </div>
         )}
       </div>
 
-      {/* Detail Modal */}
       {selectedItem && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.55)', padding: '16px' }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
           onClick={() => setSelectedItem(null)}
         >
           <div
-            style={{ display: 'flex', flexDirection: 'row', width: '100%', maxWidth: '680px', borderRadius: '16px', overflow: 'hidden', background: 'linear-gradient(135deg, #1a140f, #131115)', border: '1px solid rgba(245,166,35,0.2)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+            className="grid w-full max-w-3xl overflow-hidden rounded-2xl border border-gold/20 bg-[#131115] shadow-[0_24px_80px_rgba(0,0,0,0.6)] md:grid-cols-[280px_1fr]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Image */}
-            <div style={{ width: '260px', flexShrink: 0, position: 'relative' }}>
+            <div className="relative min-h-[240px]">
               <button
                 type="button"
                 onClick={() => {
@@ -197,75 +258,61 @@ export default function Menu() {
                   setShowFullDescription(false)
                 }}
                 aria-label="Retour au menu"
-                style={{
-                  position: 'absolute',
-                  top: '14px',
-                  left: '14px',
-                  zIndex: 10,
-                  background: 'rgba(0,0,0,0.65)',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  color: '#fff',
-                  borderRadius: '999px',
-                  minWidth: '90px',
-                  height: '38px',
-                  padding: '0 14px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  letterSpacing: '0.02em'
-                }}
+                className="absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/65 px-3 py-2 text-sm font-semibold text-white transition hover:border-gold/50 hover:text-gold"
               >
-                ← Retour
+                <FiArrowLeft />
+                Retour
               </button>
               <img
                 src={getImageUrl(selectedItem)}
                 alt={selectedItem.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                className="h-full min-h-[240px] w-full object-cover"
                 onError={(e) => { e.currentTarget.src = FALLBACK_BY_CATEGORY[selectedItem.category] }}
               />
             </div>
 
-            {/* Details */}
-            <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <p style={{ fontSize: '10px', fontWeight: 600, color: '#F5A623', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>
+            <div className="flex flex-col justify-center p-6 md:p-8">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
                 {CATEGORY_LABEL[selectedItem.category] || selectedItem.category}
               </p>
-              <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff', marginBottom: '8px', lineHeight: 1.3 }}>{selectedItem.name}</h2>
-              <p style={{ fontSize: '24px', fontWeight: 800, color: '#F5A623', marginBottom: '14px' }}>{Number(selectedItem.price).toFixed(2)} MAD</p>
-              <div style={{ marginBottom: '28px' }}>
-                <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: 1.8, maxHeight: showFullDescription ? 'none' : '3.6em', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: showFullDescription ? 'none' : 3, WebkitBoxOrient: 'vertical' }}>
-                  {selectedItem.description || 'Préparation maison du chef avec des ingrédients frais et soigneusement sélectionnés.'}
+              <h2 className="text-2xl font-bold leading-tight text-white">{selectedItem.name}</h2>
+              <p className="mt-3 text-3xl font-extrabold text-gold">{Number(selectedItem.price).toFixed(2)} MAD</p>
+              <div className="mt-5">
+                <p className={`text-sm leading-7 text-gray-300 ${showFullDescription ? '' : 'line-clamp-3'}`}>
+                  {selectedItem.description || 'Preparation maison du chef avec des ingredients frais et soigneusement selectionnes.'}
                 </p>
                 {selectedItem.description && selectedItem.description.length > 120 && (
                   <button
                     type="button"
                     onClick={() => setShowFullDescription((prev) => !prev)}
-                    style={{ background: 'none', border: 'none', color: '#F5A623', cursor: 'pointer', padding: 0, fontSize: '13px', fontWeight: 600, marginTop: '8px' }}
+                    className="mt-2 text-sm font-semibold text-gold hover:text-gold-light"
                   >
                     {showFullDescription ? 'Voir moins' : 'Voir plus'}
                   </button>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => handleReserve(selectedItem)}
-                style={{ alignSelf: 'flex-start', backgroundColor: '#F5A623', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 28px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', marginBottom: '14px' }}
-              >
-                Réserver
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedItem(null)
-                  setShowFullDescription(false)
-                }}
-                style={{ alignSelf: 'flex-start', background: 'none', border: 'none', fontSize: '13px', color: '#6b7280', cursor: 'pointer', padding: 0 }}
-              >
-                ← Retour aux Menu
-              </button>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => handleReserve(selectedItem)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-semibold text-black transition hover:bg-gold-dark"
+                >
+                  <IoRestaurantOutline />
+                  Reserver ce plat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedItem(null)
+                    setShowFullDescription(false)
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-dark-400 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-gold/40 hover:text-gold"
+                >
+                  <FiArrowLeft />
+                  Retour au menu
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,0 +1,19 @@
+
+> reservation-frontend@1.0.0 dev
+> vite --host 127.0.0.1
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m653[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m3000[22m/[39m
+[2m08 h 48 min 24 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/BookingPage.jsx, /src/App.css[22m
+[2m08 h 48 min 29 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/BookingPage.jsx, /src/App.css[22m
+[2m08 h 48 min 37 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/BookingPage.jsx, /src/App.css[22m
+[2m08 h 48 min 50 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/BookingPage.jsx, /src/App.css[22m
+[2m08 h 53 min 34 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Home.jsx, /src/App.css[22m
+[2m00 h 27 min 08 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Menu.jsx, /src/App.css[22m
+[2m00 h 28 min 17 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Menu.jsx, /src/App.css[22m
+[2m00 h 28 min 22 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ChatbotAssistant.jsx, /src/App.css[22m
+[2m00 h 29 min 10 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ChatbotAssistant.jsx, /src/App.css[22m
+[2m00 h 36 min 26 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ChatbotAssistant.jsx, /src/App.css[22m
+[2m00 h 40 min 54 s[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/MyReservations.jsx, /src/App.css[22m

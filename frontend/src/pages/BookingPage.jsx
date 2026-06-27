@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { FiArrowLeft, FiSearch, FiX } from 'react-icons/fi'
 import { servicesAPI, slotsAPI, reservationsAPI } from '../services/api'
 
 const DAY_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
@@ -29,6 +30,7 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState(state.date || buildDateTabs(1)[0].iso)
   const [slots, setSlots] = useState([])
   const [selectedSlot, setSelectedSlot] = useState(null)
+  const [slotSearch, setSlotSearch] = useState('')
   const [guestCount, setGuestCount] = useState(state.guests || 2)
   const [tableNumber, setTableNumber] = useState(state.tableNumber || null)
   const [notes, setNotes] = useState('')
@@ -37,6 +39,8 @@ export default function BookingPage() {
   const [error, setError] = useState('')
   const [booked, setBooked] = useState(false)
   const [bookedReservation, setBookedReservation] = useState(null)
+  const [qrUrl, setQrUrl] = useState('')
+  const [downloadLoading, setDownloadLoading] = useState('')
 
   useEffect(() => {
     servicesAPI.getOne(serviceId).then(res => setService(res.data)).catch(() => navigate('/'))
@@ -67,6 +71,62 @@ export default function BookingPage() {
     }
   }
 
+  useEffect(() => {
+    if (!bookedReservation?.id) return undefined
+
+    let active = true
+    let objectUrl = ''
+    reservationsAPI.qr(bookedReservation.id)
+      .then(res => {
+        if (!active) return
+        objectUrl = window.URL.createObjectURL(res.data)
+        setQrUrl(objectUrl)
+      })
+      .catch(() => setQrUrl(''))
+
+    return () => {
+      active = false
+      if (objectUrl) window.URL.revokeObjectURL(objectUrl)
+    }
+  }, [bookedReservation?.id])
+
+  const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
+
+  const handleDownloadReceipt = async () => {
+    if (!bookedReservation?.id) return
+    setDownloadLoading('receipt')
+    try {
+      const res = await reservationsAPI.receipt(bookedReservation.id)
+      downloadBlob(res.data, `recu-reservation-${bookedReservation.id}.pdf`)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Impossible de telecharger le recu')
+    } finally {
+      setDownloadLoading('')
+    }
+  }
+
+  const handleDownloadQr = async () => {
+    if (!bookedReservation?.id) return
+    setDownloadLoading('qr')
+    try {
+      const res = await reservationsAPI.qr(bookedReservation.id)
+      downloadBlob(res.data, `qr-reservation-${bookedReservation.id}.svg`)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Impossible de telecharger le QR code')
+    } finally {
+      setDownloadLoading('')
+    }
+  }
+
   if (booked) {
     const slot = bookedReservation?.slot
     const dateObj = slot ? new Date(slot.date + 'T00:00:00') : null
@@ -78,6 +138,19 @@ export default function BookingPage() {
           <p className="text-gray-400 text-sm mb-1">{service?.name} — {dateObj ? `${dateObj.getDate()} ${MONTH_FR[dateObj.getMonth()]}` : ''}</p>
           <p className="text-gray-400 text-sm mb-4">de {slot?.start_time} à {slot?.end_time}</p>
           <p className="text-gold font-bold text-2xl mb-6">{bookedReservation?.price}€</p>
+          {qrUrl && (
+            <div className="mb-5 rounded-xl border border-dark-400 bg-white p-3">
+              <img src={qrUrl} alt="QR code de confirmation" className="mx-auto h-40 w-40" />
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <button className="btn-outline-gold" onClick={handleDownloadReceipt} disabled={downloadLoading === 'receipt'}>
+              {downloadLoading === 'receipt' ? '...' : 'Recu PDF'}
+            </button>
+            <button className="btn-outline-gold" onClick={handleDownloadQr} disabled={downloadLoading === 'qr'}>
+              {downloadLoading === 'qr' ? '...' : 'QR Code'}
+            </button>
+          </div>
           <div className="flex gap-3">
             <button className="btn-gold flex-1" onClick={() => navigate('/reservations')}>Mes réservations</button>
             <button className="btn-outline-gold flex-1" onClick={() => navigate('/')}>Accueil</button>
@@ -89,6 +162,16 @@ export default function BookingPage() {
 
   const selectedDateObject = new Date(selectedDate + 'T00:00:00')
   const selectedDateLabel = `${DAY_FR[selectedDateObject.getDay()]}, ${selectedDateObject.getDate()} ${MONTH_FR[selectedDateObject.getMonth()]}`
+  const filteredSlots = slots.filter(slot => {
+    const q = slotSearch.trim().toLowerCase()
+    if (!q) return true
+    return (
+      (slot.start_time || '').toLowerCase().includes(q) ||
+      (slot.end_time || '').toLowerCase().includes(q) ||
+      String(slot.dynamic_price || '').includes(q) ||
+      (slot.is_available ? 'disponible' : 'reserve').includes(q)
+    )
+  })
 
   return (
     <div className="min-h-screen bg-dark">
@@ -96,10 +179,21 @@ export default function BookingPage() {
         {service && (
           <div className="mb-8 rounded-[32px] border border-dark-400 bg-[#090909] p-8 shadow-[0_32px_80px_rgba(0,0,0,0.35)]">
             <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-              <div>
+              <div className="flex items-start gap-4">
+                <button
+                  type="button"
+                  className="mt-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-dark-400 text-gray-400 hover:border-gold/40 hover:text-gold transition-colors"
+                  onClick={() => navigate(-1)}
+                  aria-label="Retour"
+                  title="Retour"
+                >
+                  <FiArrowLeft />
+                </button>
+                <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-gray-500 mb-3">Réservation</p>
                 <h1 className="text-4xl font-semibold text-white">{service.name}</h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">{service.description}</p>
+                </div>
               </div>
               <div className="rounded-3xl border border-dark-400 bg-dark-100 p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-gray-500 mb-2">Durée</p>
@@ -187,7 +281,29 @@ export default function BookingPage() {
                   <p className="text-xs uppercase tracking-[0.28em] text-gray-500">Créneaux disponibles</p>
                   <h3 className="text-xl font-semibold text-white">Sélectionnez l'heure</h3>
                 </div>
-                <p className="text-sm text-gray-400">{slots.length} créneaux trouvés</p>
+                <p className="text-sm text-gray-400">{filteredSlots.length} / {slots.length} créneaux</p>
+              </div>
+
+              <div className="relative mb-5">
+                <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type="search"
+                  className="input-dark pl-11 pr-11 text-sm"
+                  placeholder="Rechercher un horaire, prix ou disponibilite..."
+                  value={slotSearch}
+                  onChange={e => setSlotSearch(e.target.value)}
+                />
+                {slotSearch && (
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                    onClick={() => setSlotSearch('')}
+                    aria-label="Effacer la recherche"
+                    title="Effacer"
+                  >
+                    <FiX />
+                  </button>
+                )}
               </div>
 
               {error && <div className="mb-4 rounded-3xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>}
@@ -196,14 +312,14 @@ export default function BookingPage() {
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
                 </div>
-              ) : slots.length === 0 ? (
+              ) : filteredSlots.length === 0 ? (
                 <div className="rounded-3xl border border-dark-400 bg-dark-50 p-8 text-center text-gray-400">
-                  <p className="text-sm font-semibold text-white mb-2">Aucun créneau disponible</p>
-                  <p className="text-sm">Essayez une autre date ou revenez plus tard.</p>
+                  <p className="text-sm font-semibold text-white mb-2">Aucun créneau trouvé</p>
+                  <p className="text-sm">Essayez une autre date ou modifiez la recherche.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {slots.map(slot => {
+                  {filteredSlots.map(slot => {
                     const available = slot.is_available
                     const selected = selectedSlot?.id === slot.id
                     return (

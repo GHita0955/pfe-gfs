@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { FiDownload, FiRefreshCw } from 'react-icons/fi'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -40,6 +41,43 @@ export default function Dashboard() {
   const [forecast, setForecast] = useState([])
   const [recent, setRecent] = useState([])
   const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState('')
+
+  const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
+
+  const handleRefreshStatistics = async () => {
+    setActionLoading('stats')
+    try {
+      await dashboardAPI.refreshStatistics()
+      const fore = await dashboardAPI.getForecast()
+      setForecast(fore.data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setActionLoading('')
+    }
+  }
+
+  const handleReport = async () => {
+    setActionLoading('report')
+    try {
+      const res = await dashboardAPI.report()
+      downloadBlob(res.data, `rapport-admin-${new Date().toISOString().slice(0, 10)}.pdf`)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setActionLoading('')
+    }
+  }
 
   useEffect(() => {
     Promise.all([
@@ -72,6 +110,31 @@ export default function Dashboard() {
   return (
     <AdminLayout>
       <div className="p-4 md:p-8 space-y-5 bg-[radial-gradient(circle_at_top_right,rgba(245,166,35,0.08),transparent_35%)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">Statistiques, prevision de demande et rapports admin</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="inline-flex items-center gap-2 rounded-xl border border-[#26262a] bg-[#121215] px-4 py-2 text-sm text-gray-300 hover:border-gold/40 hover:text-gold disabled:opacity-50"
+              onClick={handleRefreshStatistics}
+              disabled={actionLoading === 'stats'}
+            >
+              <FiRefreshCw className={actionLoading === 'stats' ? 'animate-spin' : ''} />
+              Statistiques
+            </button>
+            <button
+              className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/10 px-4 py-2 text-sm font-semibold text-gold hover:bg-gold/15 disabled:opacity-50"
+              onClick={handleReport}
+              disabled={actionLoading === 'report'}
+            >
+              <FiDownload />
+              Rapport PDF
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
           <StatCard icon="€" value={`${stats?.total_revenue || 0}€`} label="Today's Income" accent />
           <StatCard icon="ORD" value={stats?.confirmed_reservations || 0} label="Today's Orders" />

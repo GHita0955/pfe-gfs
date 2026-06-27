@@ -7,7 +7,8 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app import app
-from models import db, User, Service, TimeSlot, Reservation, MenuItem
+from models import db, User, Service, TimeSlot, Reservation, MenuItem, Statistique, generate_qr_token
+from utils.forecasting import refresh_statistiques
 from utils.pricing import calculate_price
 from datetime import date, timedelta
 import random

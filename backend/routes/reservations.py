@@ -1,9 +1,12 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User, Reservation, TimeSlot
+from models import db, User, Reservation, TimeSlot, generate_qr_token
 from utils.pricing import calculate_price
 from utils.decorators import admin_required
+from utils.qr import build_reservation_qr_svg
+from utils.pdf import build_simple_pdf, reservation_receipt_lines
 from datetime import date
+from io import BytesIO
 
 reservations_bp = Blueprint('reservations', __name__)
 
@@ -33,12 +36,39 @@ def get_reservations():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if user.role == 'admin':
-        reservations = Reservation.query.order_by(Reservation.created_at.desc()).all()
-    else:
-        reservations = Reservation.query.filter_by(client_id=user_id).order_by(
-            Reservation.created_at.desc()
-        ).all()
+    query = Reservation.query
+    if user.role != 'admin':
+        query = query.filter_by(client_id=user_id)
+
+    status = request.args.get('status')
+    service_id = request.args.get('service_id', type=int)
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    search = (request.args.get('q') or '').strip().lower()
+
+    if status and status != 'all':
+        query = query.filter(Reservation.status == status)
+    if service_id or date_from or date_to:
+        query = query.join(TimeSlot)
+        if service_id:
+            query = query.filter(TimeSlot.service_id == service_id)
+        if date_from:
+            query = query.filter(TimeSlot.date >= date.fromisoformat(date_from))
+        if date_to:
+            query = query.filter(TimeSlot.date <= date.fromisoformat(date_to))
+
+    reservations = query.order_by(Reservation.created_at.desc()).all()
+    if search:
+        reservations = [
+            r for r in reservations
+            if search in (r.client.username or '').lower()
+            or search in (r.client.email or '').lower()
+            or search in (r.slot.service.name if r.slot and r.slot.service else '').lower()
+            or search in (r.slot.date.isoformat() if r.slot and r.slot.date else '')
+            or search in (r.slot.start_time if r.slot else '')
+            or search in (r.slot.end_time if r.slot else '')
+            or search in str(r.id)
+        ]
 
     return jsonify([r.to_dict() for r in reservations]), 200
 
@@ -97,7 +127,8 @@ def create_reservation():
         slot_id=slot_id,
         price=price_info['price'],
         notes=notes,
-        status='confirmed'
+        status='confirmed',
+        qr_token=generate_qr_token()
     )
     slot.is_available = False
 
@@ -107,6 +138,42 @@ def create_reservation():
     result = reservation.to_dict()
     result['price_info'] = price_info
     return jsonify(result), 201
+
+
+@reservations_bp.route('/<int:res_id>/qr', methods=['GET'])
+@jwt_required()
+def reservation_qr(res_id):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+    reservation = Reservation.query.get_or_404(res_id)
+
+    if user.role != 'admin' and reservation.client_id != user_id:
+        return jsonify({'error': 'AccÃ¨s non autorisÃ©'}), 403
+
+    if not reservation.qr_token:
+        reservation.qr_token = generate_qr_token()
+        db.session.commit()
+
+    return Response(build_reservation_qr_svg(reservation), mimetype='image/svg+xml')
+
+
+@reservations_bp.route('/<int:res_id>/receipt.pdf', methods=['GET'])
+@jwt_required()
+def reservation_receipt(res_id):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+    reservation = Reservation.query.get_or_404(res_id)
+
+    if user.role != 'admin' and reservation.client_id != user_id:
+        return jsonify({'error': 'AccÃ¨s non autorisÃ©'}), 403
+
+    pdf = build_simple_pdf(f"Recu reservation #{reservation.id}", reservation_receipt_lines(reservation))
+    return send_file(
+        BytesIO(pdf),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f"recu-reservation-{reservation.id}.pdf"
+    )
 
 
 @reservations_bp.route('/<int:res_id>/cancel', methods=['PUT'])
