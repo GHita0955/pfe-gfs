@@ -70,12 +70,7 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Demo credentials */}
-        <div className="mt-4 p-4 bg-dark-50 border border-dark-400 rounded-xl text-xs text-gray-500 space-y-1">
-          <p className="text-gray-400 font-semibold mb-1">Comptes de démo :</p>
-          <p>Admin : admin@reserv.com / admin123</p>
-          <p>Client : alice@mail.com / client123</p>
-        </div>
+        {/* Demo credentials removed as requested */}
       </div>
     </div>
   )
