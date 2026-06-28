@@ -239,14 +239,14 @@ export default function ManageMenu() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative max-w-lg w-full animate-slide-up rounded-2xl border border-[#242429] bg-gradient-to-b from-[#141417] to-[#0f1012] p-6">
-            <h2 className="text-white font-bold text-xl mb-5">
+          <div className="relative max-w-md w-full animate-slide-up rounded-2xl border border-[#242429] bg-gradient-to-b from-[#141417] to-[#0f1012] p-4">
+            <h2 className="text-white font-bold text-base mb-3">
               {editing ? 'Modifier élément menu' : 'Ajouter élément menu'}
             </h2>
 
             {error && <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-2.5">
               <div>
                 <label className={labelCls}>Nom *</label>
                 <input
@@ -262,7 +262,7 @@ export default function ManageMenu() {
                 <label className={labelCls}>Description</label>
                 <textarea
                   className={inputCls + ' resize-none'}
-                  rows={3}
+                  rows={2}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
@@ -309,7 +309,7 @@ export default function ManageMenu() {
                   <img
                     src={(form.image_url || '').trim() || FALLBACK_BY_CATEGORY[form.category]}
                     alt="Preview"
-                    className="w-full h-32 object-cover rounded-lg border border-[#26262a]"
+                    className="w-full h-[72px] object-cover rounded-lg border border-[#26262a]"
                     onError={(e) => {
                       e.currentTarget.onerror = null
                       e.currentTarget.src = FALLBACK_BY_CATEGORY[form.category] || FALLBACK_BY_CATEGORY.plat
@@ -318,13 +318,26 @@ export default function ManageMenu() {
                 </div>
               </div>
 
-              <label className="inline-flex items-center gap-2 text-sm text-gray-300">
+              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#2f3036] bg-[#121215] px-3 py-2 text-sm text-gray-200 transition-colors hover:border-gold/35">
+                <span>
+                  <span className="block text-sm font-semibold text-white">Disponible pour les clients</span>
+                  <span className="block text-xs text-gray-500">
+                    {form.is_available ? 'Ce plat sera visible dans le menu.' : 'Ce plat restera cache du menu client.'}
+                  </span>
+                </span>
                 <input
                   type="checkbox"
+                  className="sr-only"
                   checked={form.is_available}
                   onChange={(e) => setForm({ ...form, is_available: e.target.checked })}
                 />
-                Disponible pour les clients
+                <span className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors ${
+                  form.is_available ? 'border-gold/50 bg-gold/90' : 'border-[#34343a] bg-[#242429]'
+                }`}>
+                  <span className={`absolute left-1 top-1 h-4 w-4 rounded-full shadow transition-transform ${
+                    form.is_available ? 'translate-x-5 bg-black' : 'bg-gray-400'
+                  }`} />
+                </span>
               </label>
 
               <div className="flex justify-end gap-3 pt-2">

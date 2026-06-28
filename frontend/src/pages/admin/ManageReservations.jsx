@@ -89,26 +89,6 @@ export default function ManageReservations() {
     }
   }
 
-  const handleQr = async (id) => {
-    setDownloadId(`qr-${id}`)
-    try {
-      const res = await reservationsAPI.qr(id)
-      downloadBlob(res.data, `qr-reservation-${id}.svg`)
-    } catch (err) {
-      toast.error('Erreur', err.response?.data?.error || 'Impossible de telecharger le QR code.')
-    } finally {
-      setDownloadId('')
-    }
-  }
-
-  const resetFilters = () => {
-    setSearch('')
-    setStatusFilter('all')
-    setDateFrom('')
-    setDateTo('')
-    setSearchParams({})
-  }
-
   const confirmedCount = reservations.filter(r => r.status === 'confirmed').length
   const cancelledCount = reservations.filter(r => r.status === 'cancelled').length
   const pendingCount = reservations.filter(r => r.status === 'pending').length
@@ -149,7 +129,7 @@ export default function ManageReservations() {
           </button>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
           <div className="relative">
             <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
@@ -171,7 +151,6 @@ export default function ManageReservations() {
           </div>
           <input type="date" className="input-dark text-sm !bg-[#121215] !border-[#26262a]" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
           <input type="date" className="input-dark text-sm !bg-[#121215] !border-[#26262a]" value={dateTo} onChange={e => setDateTo(e.target.value)} />
-          <button className="btn-ghost border border-[#26262a] text-sm" onClick={resetFilters}>Reset</button>
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -219,13 +198,6 @@ export default function ManageReservations() {
                           >
                             <FiDownload />
                             {downloadId === `receipt-${r.id}` ? '...' : 'PDF'}
-                          </button>
-                          <button
-                            className="text-xs text-gray-300 hover:text-white border border-[#303038] px-3 py-1.5 rounded-lg transition-colors"
-                            onClick={() => handleQr(r.id)}
-                            disabled={downloadId === `qr-${r.id}`}
-                          >
-                            {downloadId === `qr-${r.id}` ? '...' : 'QR'}
                           </button>
                           {r.status === 'confirmed' && (
                             <button
