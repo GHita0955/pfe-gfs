@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { reservationsAPI } from '../services/api'
 
 const NAV_ITEMS = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -89,10 +91,68 @@ function AdminIcon({ name, className = 'w-4 h-4' }) {
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const notificationRef = useRef(null)
 
   const handleLogout = () => { logout(); navigate('/') }
 
   const initials = user ? (user.username || user.email || '?').slice(0, 2).toUpperCase() : ''
+  const pendingCount = useMemo(
+    () => notifications.filter((item) => item.status === 'pending').length,
+    [notifications]
+  )
+
+  useEffect(() => {
+    let mounted = true
+    reservationsAPI.getAll({ status: 'pending' })
+      .then((res) => {
+        if (!mounted) return
+        const pending = Array.isArray(res.data) ? res.data : []
+        if (pending.length) {
+          setNotifications(pending.slice(0, 5))
+          return
+        }
+
+        reservationsAPI.getAll({})
+          .then((allRes) => {
+            if (!mounted) return
+            setNotifications((Array.isArray(allRes.data) ? allRes.data : []).slice(0, 5))
+          })
+          .catch(() => {
+            if (mounted) setNotifications([])
+          })
+      })
+      .catch(() => {
+        if (mounted) setNotifications([])
+      })
+
+    return () => { mounted = false }
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!notificationRef.current?.contains(event.target)) {
+        setShowNotifications(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleGlobalSearch = (e) => {
+    e.preventDefault()
+    const q = globalSearch.trim()
+    if (!q) return
+    navigate(`/admin/reservations?q=${encodeURIComponent(q)}`)
+  }
+
+  const openReservation = (id) => {
+    setShowNotifications(false)
+    navigate(`/admin/reservations?q=${encodeURIComponent(String(id))}`)
+  }
 
   return (
     <div className="flex min-h-screen bg-[#060606]">
@@ -165,13 +225,78 @@ export default function AdminLayout({ children }) {
               <p className="text-white text-sm md:text-base font-medium">Welcome back, {user?.username || 'Admin'}</p>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#26262a] bg-[#121215] text-gray-500 text-sm">
+              <form
+                onSubmit={handleGlobalSearch}
+                className="hidden sm:flex items-center gap-2 rounded-xl border border-[#26262a] bg-[#121215] px-3 py-1.5 text-sm text-gray-500 transition-colors focus-within:border-gold/40"
+              >
                 <AdminIcon name="search" className="w-4 h-4" />
-                <span className="text-xs">Search</span>
+                <input
+                  type="search"
+                  value={globalSearch}
+                  onChange={(e) => setGlobalSearch(e.target.value)}
+                  placeholder="Search"
+                  className="w-24 bg-transparent text-xs text-gray-200 outline-none placeholder:text-gray-500 md:w-32"
+                />
+              </form>
+              <div className="relative" ref={notificationRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications((prev) => !prev)}
+                  className="relative grid h-9 w-9 place-items-center rounded-xl border border-[#26262a] bg-[#121215] text-gray-300 transition-colors hover:border-gold/40 hover:text-gold"
+                  aria-label="Notifications"
+                >
+                  <AdminIcon name="notifications" className="w-4 h-4" />
+                  {pendingCount > 0 && (
+                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-gold px-1 text-[10px] font-bold text-black">
+                      {pendingCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 top-11 z-50 w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[#26262a] bg-[#101012] shadow-2xl shadow-black/50">
+                    <div className="flex items-center justify-between border-b border-[#222227] px-4 py-3">
+                      <p className="text-sm font-semibold text-white">Notifications</p>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/admin/reservations')}
+                        className="text-xs font-semibold text-gold hover:text-gold-light"
+                      >
+                        Voir tout
+                      </button>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length > 0 ? notifications.map((item) => (
+                        <button
+                          type="button"
+                          key={item.id}
+                          onClick={() => openReservation(item.id)}
+                          className="block w-full border-b border-[#1f1f22] px-4 py-3 text-left transition-colors hover:bg-[#15161a]"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-white">
+                                #{item.id} {item.client_name || item.client_email}
+                              </p>
+                              <p className="mt-1 truncate text-xs text-gray-500">
+                                {item.slot?.service_name || 'Reservation'} - {item.slot?.date || 'Date inconnue'}
+                              </p>
+                            </div>
+                            <span className={item.status === 'pending' ? 'badge-gold shrink-0' : 'badge-green shrink-0'}>
+                              {item.status === 'pending' ? 'En attente' : 'Confirmee'}
+                            </span>
+                          </div>
+                        </button>
+                      )) : (
+                        <div className="px-4 py-8 text-center">
+                          <p className="text-sm font-semibold text-white">Aucune notification</p>
+                          <p className="mt-1 text-xs text-gray-500">Les nouvelles reservations apparaitront ici.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              <button className="w-9 h-9 rounded-xl border border-[#26262a] bg-[#121215] text-gray-300 grid place-items-center">
-                <AdminIcon name="notifications" className="w-4 h-4" />
-              </button>
               <button
                 onClick={handleLogout}
                 className="px-3 py-2 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:text-red-200 text-xs font-medium transition-colors flex items-center gap-2"

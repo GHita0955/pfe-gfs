@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FiDownload, FiRefreshCw, FiSearch, FiX } from 'react-icons/fi'
+import { useSearchParams } from 'react-router-dom'
 import { reservationsAPI } from '../../services/api'
 import AdminLayout from '../../components/AdminLayout'
 import { useToast } from '../../context/ToastContext'
@@ -31,6 +32,7 @@ export default function ManageReservations() {
   const [dateTo, setDateTo] = useState('')
   const [actionId, setActionId] = useState(null)
   const [downloadId, setDownloadId] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
   const toast = useToast()
   const confirm = useConfirm()
 
@@ -50,6 +52,11 @@ export default function ManageReservations() {
   useEffect(() => {
     loadReservations()
   }, [statusFilter, search, dateFrom, dateTo])
+
+  useEffect(() => {
+    const q = searchParams.get('q') || ''
+    setSearch(q)
+  }, [searchParams])
 
   const handleCancel = async (id) => {
     const ok = await confirm({
@@ -99,6 +106,7 @@ export default function ManageReservations() {
     setStatusFilter('all')
     setDateFrom('')
     setDateTo('')
+    setSearchParams({})
   }
 
   const confirmedCount = reservations.filter(r => r.status === 'confirmed').length
