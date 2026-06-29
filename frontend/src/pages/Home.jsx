@@ -58,10 +58,6 @@ export default function Home() {
               </p>
 
               <div className="mt-6 rounded-xl border border-gold/45 bg-black/55 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-gold">SOUKAINA - modules actifs</p>
-                <p className="mt-2 text-sm leading-6 text-white/80">
-                  Tarification dynamique, recherche, QR Code, PDF, statistiques et chatbot sont branches.
-                </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     className="rounded-lg border border-gold/40 bg-gold/15 px-3 py-2 text-xs font-semibold text-gold hover:bg-gold/25"
