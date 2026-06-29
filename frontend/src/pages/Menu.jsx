@@ -39,15 +39,47 @@ export default function Menu() {
   const [activeTab, setActiveTab] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedItem, setSelectedItem] = useState(null)
+  const [itemQuantity, setItemQuantity] = useState(1)
   const [showFullDescription, setShowFullDescription] = useState(false)
+  const [cartItems, setCartItems] = useState([])
+  const [showCart, setShowCart] = useState(false)
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  const handleReserve = (item = null) => {
+  const handleAddToCart = (item, quantity = 1) => {
+    const existingItem = cartItems.find(ci => ci.id === item.id)
+    if (existingItem) {
+      setCartItems(cartItems.map(ci =>
+        ci.id === item.id ? { ...ci, quantity: ci.quantity + quantity } : ci
+      ))
+    } else {
+      setCartItems([...cartItems, { ...item, quantity }])
+    }
+    setSelectedItem(null)
+    setItemQuantity(1)
+    setShowFullDescription(false)
+  }
+
+  const handleRemoveFromCart = (itemId) => {
+    setCartItems(cartItems.filter(ci => ci.id !== itemId))
+  }
+
+  const handleUpdateQuantity = (itemId, newQuantity) => {
+    if (newQuantity < 1) {
+      handleRemoveFromCart(itemId)
+    } else {
+      setCartItems(cartItems.map(ci =>
+        ci.id === itemId ? { ...ci, quantity: newQuantity } : ci
+      ))
+    }
+  }
+
+  const handleProceedToBook = () => {
     if (!user) return navigate('/login')
+    if (cartItems.length === 0) return
     navigate('/select-table', {
       state: {
-        item,
+        items: cartItems,
         serviceId: 1,
         date: new Date().toISOString().split('T')[0],
         time: '20:00',
@@ -117,11 +149,16 @@ export default function Menu() {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => handleReserve()}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-gold-dark"
+              onClick={() => setShowCart(!showCart)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-gold-dark relative"
             >
               <IoRestaurantOutline />
-              Reserver une table
+              Mon panier
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-xs text-white font-bold flex items-center justify-center">
+                  {cartItems.length}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -239,6 +276,76 @@ export default function Menu() {
             </button>
           </div>
         )}
+
+        {showCart && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowCart(false)}>
+            <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-gold/20 bg-[#131115] shadow-[0_24px_80px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between border-b border-white/10 bg-black/40 p-6">
+                <h2 className="text-2xl font-bold text-white">Mon panier</h2>
+                <button type="button" onClick={() => setShowCart(false)} className="text-gray-400 hover:text-white">
+                  <FiX className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-6">
+                {cartItems.length === 0 ? (
+                  <p className="text-center text-gray-400">Votre panier est vide</p>
+                ) : (
+                  <>
+                    <div className="space-y-4 mb-6">
+                      {cartItems.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between border border-white/10 rounded-xl p-4 bg-[#0f0f11]">
+                          <div className="flex-1">
+                            <p className="font-semibold text-white">{item.name}</p>
+                            <p className="text-sm text-gray-400">{Number(item.price).toFixed(2)} MAD</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-2 py-1">
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                                className="h-6 w-6 rounded-full flex items-center justify-center text-white hover:bg-white/10"
+                              >
+                                −
+                              </button>
+                              <span className="min-w-[20px] text-center text-sm font-semibold text-white">{item.quantity}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                                className="h-6 w-6 rounded-full flex items-center justify-center text-white hover:bg-white/10"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFromCart(item.id)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              <FiX className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-t border-white/10 pt-4">
+                      <p className="mb-4 text-lg font-semibold text-white">Total: {cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)} MAD</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowCart(false)
+                          handleProceedToBook()
+                        }}
+                        className="w-full rounded-xl bg-gold px-4 py-3 text-sm font-semibold text-black transition hover:bg-gold-dark"
+                      >
+                        Proceder a la reservation
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {selectedItem && (
@@ -292,26 +399,53 @@ export default function Menu() {
                 )}
               </div>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={() => handleReserve(selectedItem)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-semibold text-black transition hover:bg-gold-dark"
-                >
-                  <IoRestaurantOutline />
-                  Reserver ce plat
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedItem(null)
-                    setShowFullDescription(false)
-                  }}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-dark-400 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-gold/40 hover:text-gold"
-                >
-                  <FiArrowLeft />
-                  Retour au menu
-                </button>
+              <div className="mt-7 grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+                <div className="rounded-3xl border border-white/10 bg-[#0c0c0d] p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Quantité</p>
+                  <div className="mt-3 inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/40 px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setItemQuantity((prev) => Math.max(1, prev - 1))}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#131313] text-white disabled:opacity-40"
+                      disabled={itemQuantity === 1}
+                    >
+                      −
+                    </button>
+                    <span className="min-w-[32px] text-center text-lg font-semibold text-white">{itemQuantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setItemQuantity((prev) => Math.min(10, prev + 1))}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#131313] text-white"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleAddToCart(selectedItem, itemQuantity)
+                      alert('Plat ajouté au panier!')
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-semibold text-black transition hover:bg-gold-dark"
+                  >
+                    <IoRestaurantOutline />
+                    Ajouter au panier
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedItem(null)
+                      setShowFullDescription(false)
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-dark-400 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-gold/40 hover:text-gold"
+                  >
+                    <FiArrowLeft />
+                    Retour au menu
+                  </button>
+                </div>
               </div>
             </div>
           </div>

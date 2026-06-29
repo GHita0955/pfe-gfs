@@ -25,7 +25,7 @@ export default function SelectTable() {
 
   const [selectedTableId, setSelectedTableId] = useState(null)
 
-  const item = state.item
+  const items = state.items || []
   const serviceId = state.serviceId
 
   const summary = useMemo(
@@ -54,7 +54,7 @@ export default function SelectTable() {
     navigate(`/book/${targetServiceId}`, {
       state: {
         ...summary,
-        item,
+        items,
         tableNumber: selectedTable.number
       }
     })
@@ -164,11 +164,20 @@ export default function SelectTable() {
                 <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Personnes</p>
                 <p className="mt-2 text-sm font-medium text-white">{summary.guests}</p>
               </div>
-              {item && (
-              <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Menu choisi</p>
-                <p className="mt-2 text-sm font-semibold text-white">{item.name}</p>
-              </div>
+              {items.length > 0 && (
+              <>
+                <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Plats sélectionnés</p>
+                  <div className="mt-3 space-y-2">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between text-sm">
+                        <p className="text-white font-medium">{item.name}</p>
+                        <p className="text-gray-400">x{item.quantity}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
             <div className="rounded-[24px] border border-white/10 bg-[#111111]/80 px-4 py-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-gray-500">Table sélectionnée</p>

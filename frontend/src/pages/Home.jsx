@@ -57,30 +57,6 @@ export default function Home() {
                 Reserve your table and have a best experience in our place.
               </p>
 
-              <div className="mt-6 rounded-xl border border-gold/45 bg-black/55 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    className="rounded-lg border border-gold/40 bg-gold/15 px-3 py-2 text-xs font-semibold text-gold hover:bg-gold/25"
-                    onClick={() => firstService && handleBook(firstService.id)}
-                    disabled={loading || !firstService}
-                  >
-                    Tester consultation
-                  </button>
-                  <button
-                    className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:border-gold/40 hover:text-gold"
-                    onClick={() => navigate('/reservations')}
-                  >
-                    Consultation reservations
-                  </button>
-                  <button
-                    className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:border-gold/40 hover:text-gold"
-                    onClick={() => navigate('/admin/dashboard')}
-                  >
-                    Dashboard admin
-                  </button>
-                </div>
-              </div>
-
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button
                   onClick={() => firstService && handleBook(firstService.id)}

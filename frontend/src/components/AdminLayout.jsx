@@ -91,7 +91,6 @@ function AdminIcon({ name, className = 'w-4 h-4' }) {
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [globalSearch, setGlobalSearch] = useState('')
   const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
   const notificationRef = useRef(null)
@@ -141,13 +140,6 @@ export default function AdminLayout({ children }) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  const handleGlobalSearch = (e) => {
-    e.preventDefault()
-    const q = globalSearch.trim()
-    if (!q) return
-    navigate(`/admin/reservations?q=${encodeURIComponent(q)}`)
-  }
 
   const openReservation = (id) => {
     setShowNotifications(false)
@@ -225,19 +217,6 @@ export default function AdminLayout({ children }) {
               <p className="text-white text-sm md:text-base font-medium">Welcome back, {user?.username || 'Admin'}</p>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
-              <form
-                onSubmit={handleGlobalSearch}
-                className="hidden sm:flex items-center gap-2 rounded-xl border border-[#26262a] bg-[#121215] px-3 py-1.5 text-sm text-gray-500 transition-colors focus-within:border-gold/40"
-              >
-                <AdminIcon name="search" className="w-4 h-4" />
-                <input
-                  type="search"
-                  value={globalSearch}
-                  onChange={(e) => setGlobalSearch(e.target.value)}
-                  placeholder="Search"
-                  className="w-24 bg-transparent text-xs text-gray-200 outline-none placeholder:text-gray-500 md:w-32"
-                />
-              </form>
               <div className="relative" ref={notificationRef}>
                 <button
                   type="button"

@@ -29,6 +29,7 @@ export default function BookingPage() {
   const [dateTabs] = useState(() => buildDateTabs(14))
   const [selectedDate, setSelectedDate] = useState(state.date || buildDateTabs(1)[0].iso)
   const [slots, setSlots] = useState([])
+  const items = state.items || []
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [slotSearch, setSlotSearch] = useState('')
   const [guestCount, setGuestCount] = useState(state.guests || 2)
@@ -61,7 +62,11 @@ export default function BookingPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await reservationsAPI.create({ slot_id: selectedSlot.id, notes })
+      const itemsText = items.length > 0 
+        ? items.map(item => `${item.name} x${item.quantity}`).join(', ')
+        : ''
+      const noteText = itemsText ? `${notes}${notes ? '\n' : ''}Plats: ${itemsText}` : notes
+      const res = await reservationsAPI.create({ slot_id: selectedSlot.id, notes: noteText })
       setBookedReservation(res.data)
       setBooked(true)
     } catch (err) {
@@ -201,6 +206,27 @@ export default function BookingPage() {
                 <p className="mt-2 text-sm text-gray-400">Prix de base {service.base_price}€</p>
               </div>
             </div>
+            {items.length > 0 && (
+              <div className="rounded-[32px] border border-dark-400 bg-[#090909] p-6 shadow-[0_32px_80px_rgba(0,0,0,0.35)]">
+                <p className="text-xs uppercase tracking-[0.28em] text-gray-500 mb-4">Plats sélectionnés</p>
+                <div className="space-y-3">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between border border-dark-400/50 rounded-xl p-4 bg-[#0f0f11]">
+                      <div>
+                        <h3 className="font-semibold text-white">{item.name}</h3>
+                        <p className="mt-1 text-sm text-gray-400">{Number(item.price).toFixed(2)} MAD x {item.quantity}</p>
+                      </div>
+                      <p className="text-gold font-bold">{(item.price * item.quantity).toFixed(2)} MAD</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 border-t border-dark-400/50 pt-4">
+                  <p className="text-right text-gold font-bold">
+                    Total plats: {items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)} MAD
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
