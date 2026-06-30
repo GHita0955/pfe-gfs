@@ -223,7 +223,7 @@ export default function MyReservations() {
                   </div>
 
                   <div className="shrink-0 flex flex-col items-start sm:items-end gap-2">
-                    <p className="text-gold font-bold">{res.price} EUR</p>
+                    <p className="text-gold font-bold">{res.price} DHS</p>
                     <StatusBadge status={res.status} />
                     <div className="flex flex-wrap gap-2 sm:justify-end">
                       <button

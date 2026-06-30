@@ -106,7 +106,7 @@ export default function ManageServices() {
                       <td className="px-4 py-3 text-gray-600 text-xs">#{s.id}</td>
                       <td className="px-4 py-3 text-white font-semibold flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold" />{s.name}</td>
                       <td className="px-4 py-3 text-gray-500 text-xs max-w-[220px] truncate">{s.description || '—'}</td>
-                      <td className="px-4 py-3 text-gold font-bold">{s.base_price}€</td>
+                      <td className="px-4 py-3 text-gold font-bold">{s.base_price} DHS</td>
                       <td className="px-4 py-3 text-gray-300">{s.duration} min</td>
                       <td className="px-4 py-3"><span className={s.is_active ? 'badge-green' : 'badge-red'}>{s.is_active ? 'Actif' : 'Inactif'}</span></td>
                       <td className="px-4 py-3">
@@ -162,7 +162,7 @@ export default function ManageServices() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelCls}>Prix de base (€) *</label>
+                  <label className={labelCls}>Prix de base (DHS) *</label>
                   <input type="number" className={inputCls + ' !bg-[#121215] !border-[#26262a]'} placeholder="50" min="0" step="0.01" value={form.base_price} onChange={e => setForm({ ...form, base_price: e.target.value })} required />
                 </div>
                 <div>

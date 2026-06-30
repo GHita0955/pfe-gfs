@@ -187,7 +187,7 @@ export default function ManageSlots() {
                           <td className="px-4 py-3 text-gray-300">{formatDate(slot.date)}</td>
                           <td className="px-4 py-3 text-gray-300 font-semibold whitespace-nowrap">{slot.start_time} – {slot.end_time}</td>
                           <td className="px-4 py-3">
-                            <span className={`font-bold ${slot.is_discounted ? 'text-green-400' : slot.is_peak ? 'text-orange-400' : 'text-gold'}`}>{slot.dynamic_price}€</span>
+                            <span className={`font-bold ${slot.is_discounted ? 'text-green-400' : slot.is_peak ? 'text-orange-400' : 'text-gold'}`}>{slot.dynamic_price} DHS</span>
                             {slot.is_discounted && <span className="badge-green ml-2">Promo</span>}
                             {slot.is_peak && <span className="badge-gold ml-2">Peak</span>}
                           </td>

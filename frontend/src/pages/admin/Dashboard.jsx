@@ -136,7 +136,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
-          <StatCard icon="€" value={`${stats?.total_revenue || 0}€`} label="Today's Income" accent />
+          <StatCard icon="DHS" value={`${stats?.total_revenue || 0} DHS`} label="Today's Income" accent />
           <StatCard icon="ORD" value={stats?.confirmed_reservations || 0} label="Today's Orders" />
           <StatCard icon="CUS" value={stats?.total_clients || 0} label="Today's Customers" />
           <StatCard icon="X" value={stats?.cancelled_reservations || 0} label="Canceled Order" />
@@ -153,7 +153,7 @@ export default function Dashboard() {
                 <CartesianGrid {...chartStyle.grid} vertical={false} />
                 <XAxis dataKey="month_name" tick={chartStyle.tick} axisLine={false} tickLine={false} />
                 <YAxis tick={chartStyle.tick} axisLine={false} tickLine={false} />
-                <Tooltip {...chartStyle.tooltip} formatter={(v) => [`${v}€`, 'Revenue']} />
+                <Tooltip {...chartStyle.tooltip} formatter={(v) => [`${v} DHS`, 'Revenue']} />
                 <Bar dataKey="revenue" fill="url(#goldGrad)" radius={[8, 8, 0, 0]} maxBarSize={34} />
                 <defs>
                   <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
@@ -180,7 +180,7 @@ export default function Dashboard() {
               />
               <p className="text-white text-sm font-semibold">Chicken Burger</p>
               <p className="text-xs text-gray-500 mt-1">Top performing menu</p>
-              <p className="text-gold font-bold mt-2">{recent?.[0]?.price ? `${recent[0].price}€` : '10.99€'}</p>
+              <p className="text-gold font-bold mt-2">{recent?.[0]?.price ? `${recent[0].price} DHS` : '10.99 DHS'}</p>
             </div>
           </div>
 
@@ -206,7 +206,7 @@ export default function Dashboard() {
                       <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{r.client_name}</td>
                       <td className="px-4 py-3 text-gray-500 text-xs">Paid</td>
                       <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
-                      <td className="px-4 py-3 text-gold font-semibold whitespace-nowrap">{r.price}€</td>
+                      <td className="px-4 py-3 text-gold font-semibold whitespace-nowrap">{r.price} DHS</td>
                     </tr>
                   ))}
                 </tbody>
@@ -230,7 +230,7 @@ export default function Dashboard() {
                       <span className="w-2 h-2 rounded-full bg-gold" />
                       <span className="text-gray-200 text-sm">{item.name}</span>
                     </div>
-                    <span className="text-gold text-sm font-semibold">{item.price}€</span>
+                    <span className="text-gold text-sm font-semibold">{item.price} DHS</span>
                   </div>
                 ))}
               </div>

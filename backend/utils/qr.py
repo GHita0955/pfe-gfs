@@ -7,9 +7,15 @@ def build_reservation_qr_svg(reservation, size=260):
     Génère un QR-like SVG unique et déterministe pour la confirmation.
     Le payload lisible reste dans le SVG pour validation côté accueil/admin.
     """
+    client_email = getattr(reservation, 'client_email', None)
+    if not client_email and getattr(reservation, 'client', None) is not None:
+        client_email = reservation.client.email
+    if not client_email:
+        client_email = 'unknown'
+
     payload = (
-        f"RESERVATION:{reservation.id}|TOKEN:{reservation.qr_token}|"
-        f"CLIENT:{reservation.client_email}|SLOT:{reservation.slot_id}"
+        f"RESERVATION:{reservation.id}|TOKEN:{getattr(reservation, 'qr_token', '')}|"
+        f"CLIENT:{client_email}|SLOT:{getattr(reservation, 'slot_id', '')}"
     )
     digest = hashlib.sha256(payload.encode('utf-8')).digest()
     modules = 29

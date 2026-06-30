@@ -142,7 +142,7 @@ export default function BookingPage() {
           <h2 className="text-2xl font-bold text-white mb-2">Réservation confirmée</h2>
           <p className="text-gray-400 text-sm mb-1">{service?.name} — {dateObj ? `${dateObj.getDate()} ${MONTH_FR[dateObj.getMonth()]}` : ''}</p>
           <p className="text-gray-400 text-sm mb-4">de {slot?.start_time} à {slot?.end_time}</p>
-          <p className="text-gold font-bold text-2xl mb-6">{bookedReservation?.price}€</p>
+          <p className="text-gold font-bold text-2xl mb-6">{bookedReservation?.price} DHS</p>
           {qrUrl && (
             <div className="mb-5 rounded-xl border border-dark-400 bg-white p-3">
               <img src={qrUrl} alt="QR code de confirmation" className="mx-auto h-40 w-40" />
@@ -203,7 +203,7 @@ export default function BookingPage() {
               <div className="rounded-3xl border border-dark-400 bg-dark-100 p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-gray-500 mb-2">Durée</p>
                 <p className="text-2xl font-semibold text-white">{service.duration} min</p>
-                <p className="mt-2 text-sm text-gray-400">Prix de base {service.base_price}€</p>
+                <p className="mt-2 text-sm text-gray-400">Prix de base {service.base_price} DHS</p>
               </div>
             </div>
             {items.length > 0 && (
@@ -366,7 +366,7 @@ export default function BookingPage() {
                             <p className={`text-lg font-semibold ${selected ? 'text-gold' : 'text-white'}`}>{slot.start_time}</p>
                             <p className="text-sm text-gray-400">Jusqu'à {slot.end_time}</p>
                           </div>
-                          <span className={`text-sm font-semibold ${available ? 'text-gold' : 'text-gray-500'}`}>{available ? `${slot.dynamic_price}€` : 'Réservé'}</span>
+                          <span className={`text-sm font-semibold ${available ? 'text-gold' : 'text-gray-500'}`}>{available ? `${slot.dynamic_price} DHS` : 'Réservé'}</span>
                         </div>
                         {available && (
                           <div className="mt-3 flex flex-wrap gap-2 text-xs">
@@ -401,7 +401,7 @@ export default function BookingPage() {
                       ['Heure', `${selectedSlot.start_time} – ${selectedSlot.end_time}`],
                       ['Table', tableNumber || 'Non sélectionnée'],
                       ['Personnes', `${guestCount} invité${guestCount > 1 ? 's' : ''}`],
-                      ['Prix de base', `${service?.base_price}€`],
+                      ['Prix de base', `${service?.base_price} DHS`],
                       ...(selectedSlot.price_multiplier !== 1 ? [['Ajustement', `×${selectedSlot.price_multiplier}`]] : [])
                     ].map(([label, value]) => (
                       <div key={label} className="flex justify-between text-sm border-b border-dark-400 pb-3">
@@ -414,7 +414,7 @@ export default function BookingPage() {
                   <div className="mt-6 rounded-3xl border border-dark-400 bg-[#0f0f11] p-5">
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
                       <span>Total estimé</span>
-                      <span className="text-gold font-semibold text-lg">{selectedSlot.dynamic_price}€</span>
+                      <span className="text-gold font-semibold text-lg">{selectedSlot.dynamic_price} DHS</span>
                     </div>
                     <p className="text-xs text-gray-500">Le prix final est confirmé à la validation. Les tarifs peuvent varier selon le créneau.</p>
                   </div>

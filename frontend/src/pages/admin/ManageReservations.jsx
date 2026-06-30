@@ -186,7 +186,7 @@ export default function ManageReservations() {
                       <td className="px-4 py-3 text-gray-300">{r.slot?.service_name}</td>
                       <td className="px-4 py-3 text-gray-300">{r.slot?.date}</td>
                       <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{r.slot?.start_time} - {r.slot?.end_time}</td>
-                      <td className="px-4 py-3 text-gold font-semibold">{r.price} EUR</td>
+                      <td className="px-4 py-3 text-gold font-semibold">{r.price} DHS</td>
                       <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                       <td className="px-4 py-3 text-gray-500 text-xs">{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
                       <td className="px-4 py-3">
